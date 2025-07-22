@@ -1,5 +1,5 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+
 
 class Portfolio:
     def __init__(self, name, data, starting_cash=100000):
@@ -161,5 +161,20 @@ class Portfolio:
         self.log = []
         print(f"Portfolio {self.name} has been reset.")    
     
+    def set_cash(self, amount):
+        """Sets the current cash to a specific amount."""
+        if amount < 0:
+            print("Cash amount cannot be negative.")
+            return
+        self.current_cash = amount
+        print(f"Current cash set to {self.current_cash:.2f}.")
+    
+    def adjust_cash(self, amount):
+        """Adds or removes a specific amount to the current cash."""
+        if self.current_cash + amount < 0:
+            print("Insufficient cash to adjust by this amount.")
+            return
+        self.current_cash += amount
+        print(f"Added {amount:.2f} to current cash. New balance: {self.current_cash:.2f}.")
     
  
