@@ -1,0 +1,41 @@
+def plot_portfolio_return_volatility(returns, rolling_window=30):
+    #fix
+def plot_portfolio_returns(returns):
+    #fix
+
+
+# Portfolio Simulator (WIP)
+
+This is a simple Python-based portfolio simulation tool for buying/selling assets, tracking portfolio value, and viewing sector information using historical data from Yahoo Finance.
+
+## Features
+
+- Downloads and caches historical price data (`yfinance`)
+- Basic asset purchase and sale simulation
+- Tracks cash and share holdings
+- Sector tagging and display
+- Portfolio valuation
+
+## Known Flaws / Limitations
+
+- **No actual portfolio valuation over time:** Currently only tracks portfolio value based on the last available price or specified date.
+- **No transaction history:** Trades aren't logged; no way to track past actions or compute realized PnL.
+- **No portfolio rebalancing logic or strategy support.**
+- **No support for dividends, splits, or corporate actions.**
+- **No risk metrics (e.g., volatility, beta, VaR).**
+- **Not time-series aware:** Can’t analyze portfolio evolution across time (daily NAV tracking missing).
+- **Basic error handling:** Error messages exist but lack depth and structure.
+- **Global state usage (`portfolio`, `current_cash`)** is fragile and not scalable.
+
+## Next Steps
+- Implement portfolio class, def buy,sell etc.
+- Add proper time-series portfolio valuation (NAV over time)
+- Implement a transaction log (buy/sell history)
+- Add support for plotting value & performance over time
+- Include basic performance/risk analytics
+- Modularize code and improve structure
+- Eventually extend toward options/derivatives pricing and backtesting capabilities
+
+---
+
+
