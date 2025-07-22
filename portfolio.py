@@ -15,7 +15,7 @@ class Portfolio:
         Returns a string representation of the current portfolio.
         """
         output = [f"\nPortfolio: {self.name}"]
-        tickers = self.data.columns.levels[0]
+        
 
         for ticker in self.assets:
             try:
@@ -41,23 +41,12 @@ class Portfolio:
             at_date (str, optional): Date to buy the asset. If None, uses the last date in data.
             open (bool, optional): If True, buys at the open price of the day. Defaults to False, which buys at close price.
         """
-        if at_date: #Hvis bestemt dato skal bruges
-            buy_date = pd.to_datetime(at_date)
-            if buy_date not in self.data.index:
-                print(f"Date {at_date} not found in data.")
-                next_dates = self.data.index[self.data.index > buy_date]
-                if len(next_dates) == 0:
-                    print(f"No future dates available in data after {at_date}.")
-                    return
-                buy_date = next_dates[0]
-                print(f"Using next available date: {buy_date.date()}")
-        else: #Hvis ingen dato er bestemt, bruges den sidste dato i data
-            buy_date = self.data.index[-1]
+        verified_date = self.verify_date(at_date)
         
         if open: #Hvis open er True, bruges åbningskursen
-            price = self.data.loc[buy_date, (ticker, 'Open')]
+            price = self.data.loc[verified_date, (ticker, 'Open')]
         else: #Hvis open er False, bruges lukkeprisen
-            price = self.data.loc[buy_date, (ticker, 'Close')]
+            price = self.data.loc[verified_date, (ticker, 'Close')]
         total_cost = price * quantity
         if total_cost > self.current_cash:
             print(f"Not enough cash to buy {quantity} shares of {ticker}.")
@@ -66,7 +55,7 @@ class Portfolio:
         self.assets[ticker] = self.assets.get(ticker, 0) + quantity 
         
         # Log handlen
-        self.log_transaction('Buy', buy_date, ticker, quantity, price, total_cost)
+        self.log_transaction('Buy', verified_date, ticker, quantity, price, total_cost)
 
         
         print(f"Bought {quantity} shares of {ticker}, at {price} per share. Current holdings: {self.assets[ticker]} shares.")
@@ -84,31 +73,19 @@ class Portfolio:
             print(f"Not enough shares of {ticker} to sell.")
             return
         
-        if at_date: #Hvis bestemt dato skal bruges
-            sell_date = pd.to_datetime(at_date)
-            if sell_date not in self.data.index:
-                print(f"Date {at_date} not found in data.")
-                next_dates = self.data.index[self.data.index > sell_date]
-                if len(next_dates) == 0:
-                    print(f"No future dates available in data after {at_date}.")
-                    return
-                sell_date = next_dates[0]
-                print(f"Using next available date: {sell_date.date()}")
-        
-        else: #Hvis ingen dato er bestemt, bruges den sidste dato i data
-            sell_date = self.data.index[-1]
+        verified_date = self.verify_date(at_date)
             
         if open: #Hvis open er True, bruges åbningskursen
-            price = self.data.loc[sell_date, (ticker, 'Open')]
+            price = self.data.loc[verified_date, (ticker, 'Open')]
         else: #Hvis open er False, bruges lukkeprisen
-            price = self.data.loc[sell_date, (ticker, 'Close')]
+            price = self.data.loc[verified_date, (ticker, 'Close')]
             
         total_revenue = price * quantity
         self.current_cash += total_revenue
         self.assets[ticker] -= quantity
         
         # Log handlen
-        self.log_transaction('Sell', sell_date, ticker, quantity, price, total_revenue)
+        self.log_transaction('Sell', verified_date, ticker, quantity, price, total_revenue)
         
         
         print(f"Sold {quantity} shares of {ticker}, at {price} per share. Remaining holdings: {self.assets.get(ticker, 0)} shares.")
@@ -124,6 +101,18 @@ class Portfolio:
             'Price': price,
             'Total': total
         })
+        
+    def verify_date(self, date) -> pd.Timestamp:
+        """Checks if the given date is in the data index, if not, returns the next available date."""
+        if date not in self.data.index:
+            print(f"Date {date} not found in data.")
+            next_dates = self.data.index[self.data.index > date]
+            if len(next_dates) == 0:
+                print(f"No future dates available in data after {date}.")
+                return False
+            date = next_dates[0]
+            print(f"Using next available date: {date.date()}")
+        return date
         
     def get_portfolio_value(self):
         """Calculates the total value of the portfolio based on current prices."""

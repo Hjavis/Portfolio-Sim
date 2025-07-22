@@ -1,7 +1,7 @@
 def plot_portfolio_return_volatility(returns, rolling_window=30):
-    #fix
+    #skal bruge et fix
 def plot_portfolio_returns(returns):
-    #fix
+    #skal fixes fix
 
 
 # Portfolio Simulator (WIP)
@@ -17,9 +17,7 @@ This is a simple Python-based portfolio simulation tool for buying/selling asset
 - Portfolio valuation
 
 ## Known Flaws / Limitations
-
-- **No actual portfolio valuation over time:** Currently only tracks portfolio value based on the last available price or specified date.
-- **No transaction history:** Trades aren't logged; no way to track past actions or compute realized PnL.
+- **No actual portfolio valuation over time:** Currently only tracks portfolio value based on the last available price or specified date
 - **No portfolio rebalancing logic or strategy support.**
 - **No support for dividends, splits, or corporate actions.**
 - **No risk metrics (e.g., volatility, beta, VaR).**
@@ -28,13 +26,11 @@ This is a simple Python-based portfolio simulation tool for buying/selling asset
 - **Global state usage (`portfolio`, `current_cash`)** is fragile and not scalable.
 
 ## Next Steps
-- Implement portfolio class, def buy,sell etc.
 - Add proper time-series portfolio valuation (NAV over time)
-- Implement a transaction log (buy/sell history)
 - Add support for plotting value & performance over time
 - Include basic performance/risk analytics
 - Modularize code and improve structure
-- Eventually extend toward options/derivatives pricing and backtesting capabilities
+- Eventually extend toward options/derivatives pricing and backtesting capabilities, portfolio.asset, buy assets etc needs adjusting.
 
 ---
 
