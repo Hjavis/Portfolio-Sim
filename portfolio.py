@@ -1,5 +1,5 @@
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 class Portfolio:
     def __init__(self, name, data, starting_cash=100000):

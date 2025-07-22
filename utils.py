@@ -1,10 +1,60 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 
+def plot_portfolio_value(self, start_date="2021-01-01", end_date=pd.Timestamp.today()):
+        """
+        Plots total portfolio value over time, accounting for changing holdings.
 
-def plot_portfolio(Portfolio):
-    tickers = Portfolio.data.columns.levels[0]
-    weights = [Portfolio[(ticker, 'Close')].iloc[-1] for ticker in tickers]
+        Parameters:
+        start_date (str or pd.Timestamp): Start date.
+        end_date (str or pd.Timestamp): End date.
+
+        Returns:
+        None
+        """
+        start_date = pd.to_datetime(start_date)
+        end_date = pd.to_datetime(end_date)
+
+        #filter data fra start til slutdato
+        if start_date >= end_date:
+            raise ValueError("Start date must be before end date.")
+        
+        date_range = self.data.loc[(self.data.index >= start_date) & (self.data.index <= end_date)].index
+
+        # Ny dataframe til holdings
+        holdings = pd.DataFrame(0, index=date_range, columns=self.data.columns.levels[0])
+
+        # Benyt log til at opdatere holdings
+        for tx in self.log:
+            tx_date = pd.to_datetime(tx['Date'])
+            if tx_date > end_date:
+                continue
+            if tx_date not in holdings.index:
+                continue 
+
+            ticker = tx['Ticker']
+            qty = tx['Quantity'] if tx['Type'] == 'Buy' else -tx['Quantity']
+            holdings.loc[tx_date:, ticker] += qty  #Opdatere holdings fra denne dato og fremad
+
+        #Få Closeprices for alle relevante datoer
+        close_prices = self.data.loc[date_range, pd.IndexSlice[:, 'Close']]
+        close_prices.columns = close_prices.columns.droplevel(1)
+
+    
+        portfolio_value = (holdings * close_prices).sum(axis=1) + self.current_cash
+
+    
+        plt.figure(figsize=(10, 6))
+        portfolio_value.plot(title=f"Portfolio Value Over Time ({self.name})")
+        plt.xlabel("Date")
+        plt.ylabel("Total Value")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
+        
+def plot_portfolio(portfolio):
+    tickers = portfolio.data.columns.levels[0]
+    weights = [portfolio[(ticker, 'Close')].iloc[-1] for ticker in tickers]
     
     plt.figure(figsize=(10, 6))
     plt.pie(weights, labels=tickers, autopct='%1.1f%%', startangle=140)
@@ -12,7 +62,7 @@ def plot_portfolio(Portfolio):
     plt.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
     plt.show()
 
-def plot_portfolio_historic(portfolio, plot_date):
+def plot_portfolio_historic(portfolio, plot_date: pd.Timestamp):
     plot_date = pd.to_datetime(plot_date)
 
     # Find nærmeste dato før eller på plot_date
@@ -52,22 +102,19 @@ def plot_portfolio_historic(portfolio, plot_date):
     plt.axis('equal')
     plt.show()
     
-def plot_sector_distribution(data):
+def plot_sector_distribution(portfolio):
     """
     Plots the sector distribution of the portfolio.
-    
-    Parameters:
-    data (DataFrame): A DataFrame containing the portfolio data with sectors.
-    
+ 
     Returns:
     None
     """
-    tickers = data.columns.levels[0]
+    tickers = portfolio.columns.levels[0]
     
     sectors = []
     for ticker in tickers:
-        if ('Sector' in data[ticker].columns):
-            sector_val = data[(ticker, 'Sector')].dropna().iloc[0]
+        if ('Sector' in portfolio[ticker].columns):
+            sector_val = portfolio[(ticker, 'Sector')].dropna().iloc[0]
             sectors.append(sector_val)
         else:
             sectors.append('Unknown')
@@ -78,6 +125,43 @@ def plot_sector_distribution(data):
     plt.figure(figsize=(10, 6))
     sector_counts.plot(kind='bar')
     plt.title('Sector Distribution in Portfolio')
+    plt.xlabel('Sectors')
+    plt.ylabel('Number of Assets')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+    
+def plot_sector_distribution_historic(portfolio, plot_date: pd.Timestamp):
+    """
+    Plots the sector distribution of the portfolio at a specific date.
+    
+    Parameters:
+    plot_date: The date for which to plot the sector distribution.
+    
+    Returns:
+    None
+    """
+    plot_date = pd.to_datetime(plot_date)
+
+    #nærmeste dato før eller på plot_date
+    valid_dates = portfolio.index[portfolio.index <= plot_date]
+    if len(valid_dates) == 0:
+        print(f"No data available before {plot_date}")
+        return
+    date = valid_dates[-1]
+
+    #find sektor for hver ticker
+    sectors = []
+    for ticker in portfolio.columns.levels[0]:
+        if (ticker, 'Sector') in portfolio.columns:
+            sector_val = portfolio.loc[date, (ticker, 'Sector')]
+            sectors.append(sector_val)
+    
+    sector_counts = pd.Series(sectors).value_counts()
+    
+    plt.figure(figsize=(10, 6))
+    sector_counts.plot(kind='bar')
+    plt.title(f'Sector Distribution on {date.date()}')
     plt.xlabel('Sectors')
     plt.ylabel('Number of Assets')
     plt.xticks(rotation=45)
@@ -123,35 +207,5 @@ def plot_portfolio_return_volatility(returns, rolling_window=30):
     rolling_volatility.plot(title='Rolling Volatility of Portfolio Returns')
     plt.xlabel('Date')
     plt.ylabel('Volatility')
-    plt.grid(True)
-    plt.show()
-
-def plot_portfolio_value(data, portfolio, start_date=None, end_date=None):
-    """         
-    Plots the value of the portfolio over time.
-    
-    Parameters:
-    data (DataFrame): A DataFrame containing the portfolio data with 'Close' prices.
-    portfolio (dict): A dictionary with tickers as keys and weights as values.
-    start_date (str or pd.Timestamp): Start date for the plot (optional).
-    end_date (str or pd.Timestamp): End date for the plot (optional).
-    
-    Returns:
-    None
-    """
-    if start_date:
-        data = data.loc[data.index >= pd.to_datetime(start_date)]
-    if end_date:
-        data = data.loc[data.index <= pd.to_datetime(end_date)]
-    
-    close_prices = pd.DataFrame({ticker: data[(ticker, 'Close')] for ticker in portfolio})
-    
-    # Calculate portfolio value over time
-    portfolio_value = close_prices.mul(pd.Series(portfolio), axis=1).sum(axis=1)
-    
-    plt.figure(figsize=(10, 6))
-    portfolio_value.plot(title='Portfolio Value Over Time')
-    plt.xlabel('Date')
-    plt.ylabel('Portfolio Value')
     plt.grid(True)
     plt.show()
