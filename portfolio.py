@@ -32,7 +32,7 @@ class Portfolio:
     def __repr__(self):
         return f"Portfolio(name='{self.name}', cash={self.current_cash:.2f}, holdings={len(self.assets)})"
 
-    def buy_asset(self, ticker, quantity, at_date=None, open=False):
+    def buy_asset(self, ticker, quantity:int, at_date=None, open=False):
         """_summary_
 
         Args:
@@ -71,7 +71,7 @@ class Portfolio:
         
         print(f"Bought {quantity} shares of {ticker}, at {price} per share. Current holdings: {self.assets[ticker]} shares.")
         
-    def sell_asset(self, ticker, quantity, at_date=None, open=False):
+    def sell_asset(self, ticker, quantity:int, at_date=None, open=False):
         """_summary_
 
         Args:
@@ -115,7 +115,7 @@ class Portfolio:
         if self.assets[ticker] == 0:
             del self.assets[ticker]
         
-    def log_transaction(self, type_, date, ticker, quantity, price, total):
+    def log_transaction(self, type_, date, ticker, quantity:int, price:float, total):
         self.log.append({
             'Type': type_,
             'Date': date,
@@ -161,20 +161,37 @@ class Portfolio:
         self.log = []
         print(f"Portfolio {self.name} has been reset.")    
     
-    def set_cash(self, amount):
+    def set_cash(self, amount:float, at_date=None):
         """Sets the current cash to a specific amount."""
         if amount < 0:
             print("Cash amount cannot be negative.")
             return
+        difference = amount - self.current_cash
         self.current_cash = amount
+        
+        #log cash justering
+        if at_date is None:
+            at_date = pd.to_datetime(at_date)
+        else:
+            at_date = pd.to_datetime(at_date)
+        self.log_transaction("Cash Adjustment", at_date, "CASH", 1, difference, difference)
+        
         print(f"Current cash set to {self.current_cash:.2f}.")
     
-    def adjust_cash(self, amount):
+    def adjust_cash(self, amount:float, at_date=None):
         """Adds or removes a specific amount to the current cash."""
         if self.current_cash + amount < 0:
             print("Insufficient cash to adjust by this amount.")
             return
         self.current_cash += amount
-        print(f"Added {amount:.2f} to current cash. New balance: {self.current_cash:.2f}.")
+        
+        #log cash justering
+        if at_date is None:
+            at_date = pd.to_datetime(at_date)
+        else:
+            at_date = pd.to_datetime(at_date)
+        self.log_transaction("Cash Adjustment", at_date, "CASH", 1, amount, amount)
+        
+        print(f"Cash adjustet, new balance: {self.current_cash:.2f}.")
     
  
