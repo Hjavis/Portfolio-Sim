@@ -168,7 +168,8 @@ class Portfolio:
         print(f"Current cash set to {self.current_cash:.2f}.")
     
     def adjust_cash(self, amount:float, at_date=None):
-        """Adds or removes a specific amount to the current cash."""
+        """__summary__
+        Adds or removes(-) a specific amount to the current cash and logs the transaction"""
         if self.current_cash + amount < 0:
             print("Insufficient cash to adjust by this amount.")
             return
