@@ -12,41 +12,41 @@ portfolio_return_float(data, start_date=None, end_date=None):
 
 randomwalk (skal laves ordenligt)
 
-logging til brug af PnL
+fremtidig cashflows skal discountes
+
+#normalfordeling VaR, covariance var senere?
 
 def first_portfolio_activity og set som default på mange utils og metrics
 
 ABC Abstract, Property, Deque 
 
 
-# Portfolio Simulator (WIP)
+# Simple Portfolio Management and Backtesting System
 
-This is a simple Python-based portfolio simulation tool for buying/selling assets, tracking portfolio value, and viewing sector information using historical data from Yahoo Finance.
+A Python-based toolkit for simulating and analyzing trading strategies, managing portfolios, and evaluating performance against benchmarks.
 
 ## Features
+- **Portfolio Management**: Track holdings, cash, transactions, and performance metrics (VaR, PnL).  
+- **Backtesting Engine**: Test moving-average strategies against historical data.  
+- **Cash Flow System**: Model dividends, derivatives, and interest payments with tax-aware calculations.  
+- **Data Pipeline**: Fetch S&P 500 stock data via Yahoo Finance (YFinance) and store locally.  
+- **Visualization**: Plot portfolio allocations, sector distributions, and strategy performance.  
 
-- Downloads and caches historical price data (`yfinance`)
-- Basic asset purchase and sale simulation
-- Tracks cash and share holdings
-- Sector tagging and display
-- Portfolio valuation
+## Key Technologies  
+- **Python** (Pandas, NumPy, Matplotlib)  
+- **OOP Design** (Abstract Classes, Type Hints)  
+- **Financial Metrics** (VaR, Rolling Volatility, Cumulative Returns)  
+- **YFinance API** for market data  
 
-## Known Flaws / Limitations
-- **No actual portfolio valuation over time:** Currently only tracks portfolio value based on the last available price or specified date
-- **No portfolio rebalancing logic or strategy support.**
-- **No support for dividends, splits, or corporate actions.**
-- **No risk metrics (e.g., volatility, beta, VaR).**
-- **Not time-series aware:** Can’t analyze portfolio evolution across time (daily NAV tracking missing).
-- **Basic error handling:** Error messages exist but lack depth and structure.
+## Example Use Case  
+```python
+from portfolio import Portfolio  
+from backtest import BackTester  
 
-
-## Next Steps
-- Add proper time-series portfolio valuation (NAV over time)
-- Add support for plotting value & performance over time
-- Include basic performance/risk analytics
-- Modularize code and improve structure
-- Eventually extend toward options/derivatives pricing and backtesting capabilities, portfolio.asset, buy assets etc needs adjusting.
-
----
+# Initialize portfolio and backtest a moving-average strategy  
+pf = Portfolio(name="Demo", data=data, starting_cash=100000)  
+pf.buy_asset("AAPL", 10, at_date="2020-01-01")  
+backtester = BackTester(pf)  
+backtester.moving_average_strategy_full("AAPL", window=30)  
 
 

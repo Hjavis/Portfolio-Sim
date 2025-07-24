@@ -95,7 +95,8 @@ def plot_portfolio_historic(portfolio, plot_date):
     # Udregn portofølje på plot_date
     holdings = {}
     for tx in portfolio.log:
-        if tx['Date'] <= date:
+        tx_date = pd.to_datetime(tx['Date'])
+        if tx_date <= date:
             qty = holdings.get(tx['Ticker'], 0)
             if tx['Type'] == 'Buy':
                 holdings[tx['Ticker']] = qty + tx['Quantity']

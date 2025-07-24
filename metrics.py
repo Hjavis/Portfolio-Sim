@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 from portfolio import Portfolio
 from download_data import download_and_save_data, load_data
 from utils import plot_portfolio, plot_sector_distribution, get_time_interval
 from collections import defaultdict, deque
+from scipy.stats import norm
 
 
 def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
@@ -66,6 +68,8 @@ def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
 
     
     return realised_pnl, unrealised_pnl
+
+
 
 def portfolio_returns(data, start_date=None, end_date=None):
     #fix

@@ -15,7 +15,7 @@ def download_and_save_data(save_path='Sim/tickerdata.csv'):
         print("Data already downloaded.")
         return  # Don’t download
 
-    tickerdata = yf.download(tickers, start="2015-01-01", end="2025-07-20", group_by='ticker')
+    tickerdata = yf.download(tickers, start="2015-01-01", end="2025-07-23", group_by='ticker')
 
     sectors = {}
     for ticker in tickers:

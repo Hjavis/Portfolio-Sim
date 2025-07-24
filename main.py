@@ -6,14 +6,15 @@ data = load_data("Sim/tickerdata.csv")
 from portfolio import Portfolio
 pf = Portfolio(name="test", data=data, starting_cash=100000)
 
-from utils import plot_portfolio, plot_sector_distribution, plot_portfolio_returns, plot_portfolio_return_volatility
+from backtest import BackTester
+
+from utils import plot_portfolio, plot_portfolio_historic, plot_sector_distribution, plot_portfolio_returns, plot_portfolio_return_volatility
 from metrics import portfolio_returns, portfolio_return_float
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 #download_and_save_data()
-#data = load_data('Sim/tickerdata.csv')
 #plot_portfolio(portfolio)
 #plot_sector_distribution(data)
 
@@ -37,10 +38,12 @@ print(data.columns)
 # Example usage of the Portfolio class
 pf.buy_asset('AAPL', 10, at_date='2016-01-05')
 pf.buy_asset('GOOGL', 155, at_date='2016-05-05')
-print(pf.current_cash)
+pf.buy_asset('TSLA', 241, at_date='2018-04-15')
+pf.buy_asset('NVDA', 41, at_date='2017-12-20')
 
-pf.sell_asset('GOOGL', 100, at_date='2025-07-13')  
+pf.sell_asset('GOOGL', 100, at_date='2025-07-13') 
+print(pf.calculate_var(lookback_days=45))
+pf.reset_portfolio()
 
-plot_portfolio(pf)
-
-print(pf.get_portfolio_log().tail())
+pfbacktest = BackTester(pf)
+pfbacktest.moving_average_strategy_full('AAPL', window=30)

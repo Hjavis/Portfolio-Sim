@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 class Portfolio:
     def __init__(self, name, data, starting_cash=100000):
@@ -121,15 +121,48 @@ class Portfolio:
             date = next_dates[0]
             print(f"Using next available date: {date.date()}")
         return date
+    
+    def calculate_var(self, confidence_level=0.95, lookback_days=100) -> float:
+        """
+        Calculates portfolio Value at Risk (VaR) using historical simulation.
+
+        Args:
+            confidence_level (float): Confidence level for VaR (e.g. 0.95 for 95% VaR).
+            lookback_days (int): Number of past trading days to use.
+
+        Returns:
+            float: Estimated daily VaR.
+        """
+        if not self.assets:
+            print("No assets in portfolio.")
+            return 0.0
+
+        returns = []
+        for ticker, quantity in self.assets.items():
+            if (ticker, 'Close') not in self.data.columns:
+                continue
+            price_series = self.data[(ticker, 'Close')].dropna()
+            daily_returns = price_series.pct_change().dropna()
+            weighted_returns = daily_returns[-lookback_days:] * quantity * price_series.iloc[-1]
+            returns.append(weighted_returns)
+
+        if not returns:
+            print("No valid return data.")
+            return 0.0
+
+        portfolio_returns = pd.concat(returns, axis=1).sum(axis=1)
+        var = -np.percentile(portfolio_returns, (1 - confidence_level) * 100)
+        print(f"{int(confidence_level*100)}% 1-day Historical VaR: ${var:.2f}")
+        return var
         
-    def get_portfolio_value(self):
+    def get_portfolio_value(self) -> float:
         """Calculates the total value of the portfolio based on current prices."""
         total_value = self.current_cash
         for ticker, quantity in self.assets.items():
             if ticker in self.data.columns.levels[0]:
                 price = self.data[(ticker, 'Close')].iloc[-1]
                 total_value += price * quantity
-        return total_value 
+        return total_value
         
     def get_asset_quantity(self, ticker):
         """Returns the quantity of a specific asset in the portfolio."""
