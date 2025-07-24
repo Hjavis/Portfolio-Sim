@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-from portfolio import portfolio
+from portfolio import Portfolio
 from download_data import download_and_save_data, load_data
-from Sim.utils import plot_portfolio, plot_sector_distribution, get_time_interval
+from utils import plot_portfolio, plot_sector_distribution, get_time_interval
 from collections import defaultdict, deque
 
 
@@ -25,8 +25,6 @@ def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
     unrealised_pnl = 0.0
     inventory = defaultdict(deque)
     
-
-    
     for log in portfolio.get_portfolio_log().itertuples():
         if not (start <= log.Date <= end):
             continue
@@ -37,22 +35,36 @@ def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
         
         if log.Type == 'Buy':
             inventory[ticker].append((quantity, price))
+            
+            
         elif log.Type == 'Sell':
             quantity_to_sell = quantity
             while quantity_to_sell > 0 and inventory[ticker]:
-                
+                bought_quantity, bought_price =inventory[ticker][0]
+                matched_quantity = min(quantity_to_sell, bought_quantity)
+                pnl = matched_quantity * (price - bought_price)
+                realised_pnl += pnl
+                quantity_to_sell -= matched_quantity
+                if matched_quantity == bought_quantity:
+                    inventory[ticker].popleft()
+                else:
+                    inventory[ticker][0] = (bought_quantity - matched_quantity, bought_price)
             
-            realised_pnl += log.Quantity * log.Price
         elif log.Type == 'Dividend':
             realised_pnl += log.Total
-        
-
             
-
-
+        elif log.Type == 'Interest':
+            realised_pnl += log.Total
+            
+        else: #Fix hvis der tilføjes andre former for cashflows
+            raise ValueError(f"Transaction type '{log.Type}' not implemented.")
+        
+    for ticker, lots in inventory.items():
+        current_price = prices.loc[end, (ticker, 'Close')]
+    for quantity, cost in lots:
+        unrealised_pnl += quantity * (current_price - cost)
 
     
-   
     return realised_pnl, unrealised_pnl
 
 def portfolio_returns(data, start_date=None, end_date=None):

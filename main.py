@@ -8,8 +8,6 @@ pf = Portfolio(name="test", data=data, starting_cash=100000)
 
 from utils import plot_portfolio, plot_sector_distribution, plot_portfolio_returns, plot_portfolio_return_volatility
 from metrics import portfolio_returns, portfolio_return_float
-
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -40,3 +38,9 @@ print(data.columns)
 pf.buy_asset('AAPL', 10, at_date='2016-01-05')
 pf.buy_asset('GOOGL', 155, at_date='2016-05-05')
 print(pf.current_cash)
+
+pf.sell_asset('GOOGL', 100, at_date='2025-07-13')  
+
+plot_portfolio(pf)
+
+print(pf.get_portfolio_log().tail())

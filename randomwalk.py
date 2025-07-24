@@ -55,3 +55,23 @@ def plot_random_walk_with_drift_and_volatility(steps=1000, drift=0.01, volatilit
     plt.grid()
     plt.legend()
     plt.show()
+    
+    
+def random_walk_with_drift_volatility_and_trend(steps=1000, drift=0.01, volatility=0.1, trend=0.001):
+    """Generates a random walk with drift, volatility, and trend."""
+    steps = np.random.normal(loc=drift + trend, scale=volatility, size=steps)
+    return steps.cumsum()
+
+def plot_random_walk_with_drift_volatility_and_trend(steps=1000, drift=0.01, volatility=0.1, trend=0.001):
+    """Plots a random walk with drift, volatility, and trend."""
+    walk = random_walk_with_drift_volatility_and_trend(steps, drift, volatility, trend)
+    plt.figure(figsize=(10, 6))
+    plt.plot(walk, label='Random Walk with Drift, Volatility, and Trend')
+    plt.title('Random Walk with Drift, Volatility, and Trend')
+    plt.xlabel('Steps')
+    plt.ylabel('Position')
+    plt.axhline(0, color='black', lw=0.5, ls='--')
+    plt.grid()
+    plt.legend()
+    plt.show()
+    

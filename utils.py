@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
-
+import numpy as np
 def plot_portfolio_value(self, start_date="2021-01-01", end_date=pd.Timestamp.today()):
         """
         Plots total portfolio value over time, accounting for changing holdings.
@@ -53,14 +53,34 @@ def plot_portfolio_value(self, start_date="2021-01-01", end_date=pd.Timestamp.to
         plt.show()
         
 def plot_portfolio(portfolio):
-    tickers = portfolio.data.columns.levels[0]
-    weights = [portfolio[(ticker, 'Close')].iloc[-1] for ticker in tickers]
-    
-    plt.figure(figsize=(10, 6))
-    plt.pie(weights, labels=tickers, autopct='%1.1f%%', startangle=140)
+    if not portfolio.assets:
+        print("No holdings in the portfolio.")
+        return
+
+    tickers = list(portfolio.assets.keys())
+    latest_prices = portfolio.data.loc[portfolio.data.index[-1]]
+
+    weights = []
+    labels = []
+
+    for ticker in tickers:
+        quantity = portfolio.assets[ticker]
+        price = latest_prices[(ticker, 'Close')]
+        value = quantity * price
+        if value > 0 and np.isfinite(value):
+            weights.append(value)
+            labels.append(ticker)
+
+    if not weights:
+        print("No valid holdings to plot.")
+        return
+
+    plt.figure(figsize=(8, 6))
+    plt.pie(weights, labels=labels, autopct='%1.1f%%', startangle=140)
     plt.title('Portfolio Allocation')
-    plt.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
+    plt.axis('equal')
     plt.show()
+
 
 def plot_portfolio_historic(portfolio, plot_date):
     plot_date = pd.to_datetime(plot_date)

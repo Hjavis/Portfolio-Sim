@@ -102,6 +102,14 @@ class Portfolio:
             'Total': total
         })
         
+    def get_portfolio_log(self):
+        """Returns the transaction log of the portfolio."""
+        return pd.DataFrame(self.log)
+    
+    def print_portfolio_log(self, n=5):
+        log = Portfolio.get_portfolio_log()
+        print(log[log['Type'].isin(['Buy', 'Sell'])].tail(n))
+        
     def verify_date(self, date) -> pd.Timestamp:
         """Checks if the given date is in the data index, if not, returns the next available date."""
         if date not in self.data.index:
@@ -137,10 +145,6 @@ class Portfolio:
             quantity = self.assets[ticker]
             price = self.data[(ticker, 'Close')].iloc[-1]
             return quantity * price
-
-    def get_portfolio_log(self):
-        """Returns the transaction log of the portfolio."""
-        return pd.DataFrame(self.log)
     
 
     def reset_portfolio(self):
