@@ -62,7 +62,7 @@ def plot_portfolio(portfolio):
     plt.axis('equal')  # Equal aspect ratio ensures that pie chart is circular.
     plt.show()
 
-def plot_portfolio_historic(portfolio, plot_date: pd.Timestamp):
+def plot_portfolio_historic(portfolio, plot_date):
     plot_date = pd.to_datetime(plot_date)
 
     # Find nærmeste dato før eller på plot_date
@@ -131,7 +131,7 @@ def plot_sector_distribution(portfolio):
     plt.tight_layout()
     plt.show()
     
-def plot_sector_distribution_historic(portfolio, plot_date: pd.Timestamp):
+def plot_sector_distribution_historic(portfolio, plot_date):
     """
     Plots the sector distribution of the portfolio at a specific date.
     
@@ -168,6 +168,45 @@ def plot_sector_distribution_historic(portfolio, plot_date: pd.Timestamp):
     plt.tight_layout()
     plt.show()
     
+def verify_date_in_df(df: pd.DataFrame, date) -> pd.Timestamp:
+    date = pd.to_datetime(date)
+    if date in df.index:
+        return date
+    next_dates = df.index[df.index > date]
+    if len(next_dates) == 0:
+        raise ValueError(f"No valid date found after {date}.")
+    return next_dates[0]
+    
+def get_time_interval(
+    data: pd.DataFrame,
+    start_date=None,
+    end_date=None,
+    verify_date=verify_date_in_df) -> tuple[pd.Timestamp, pd.Timestamp]:
+    index = data.index
+    
+    if start_date is not None:
+        start = verify_date(data, start_date)
+    else:
+        start = index[0]
+        
+    if end_date is not None:
+        end_date = pd.to_datetime(end_date)
+        if end_date in index:
+            end = end_date
+        else:
+            prev_dates = index[index < end_date]
+            if len(prev_dates) == 0:
+                raise ValueError(f"No dates before {end_date} in data index.")
+            end = prev_dates[-1]
+    else:
+        end = index[-1]
+    
+    if end < start:
+        raise ValueError(f"End date {end} is before start date {start}.")
+    
+    return start, end
+    
+
 def plot_portfolio_returns(returns):
     #fix
     """

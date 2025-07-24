@@ -1,7 +1,22 @@
+utils
 def plot_portfolio_return_volatility(returns, rolling_window=30):
     #skal bruge et fix
 def plot_portfolio_returns(returns):
     #skal fixes fix
+
+metrics
+portfolio_returns(data, start_date=None, end_date=None):
+    #fix
+portfolio_return_float(data, start_date=None, end_date=None):
+    #fix
+
+randomwalk (skal laves ordenligt)
+
+logging til brug af PnL
+
+def first_portfolio_activity og set som default på mange utils og metrics
+
+ABC Abstract, Property, Deque 
 
 
 # Portfolio Simulator (WIP)
@@ -23,7 +38,7 @@ This is a simple Python-based portfolio simulation tool for buying/selling asset
 - **No risk metrics (e.g., volatility, beta, VaR).**
 - **Not time-series aware:** Can’t analyze portfolio evolution across time (daily NAV tracking missing).
 - **Basic error handling:** Error messages exist but lack depth and structure.
-- **Global state usage (`portfolio`, `current_cash`)** is fragile and not scalable.
+
 
 ## Next Steps
 - Add proper time-series portfolio valuation (NAV over time)

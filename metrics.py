@@ -2,12 +2,61 @@ import pandas as pd
 import numpy as np
 from portfolio import portfolio
 from download_data import download_and_save_data, load_data
-from Sim.utils import plot_portfolio, plot_sector_distribution
+from Sim.utils import plot_portfolio, plot_sector_distribution, get_time_interval
+from collections import defaultdict, deque
 
-download_and_save_data()  # Will skip if already saved
-data = load_data('Sim/tickerdata.csv')
+
+def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
+    """
+    Calculate the profit and loss of the portfolio over a specified date range.
+    
+    Parameters:
+        portfolio (Portfolio): The portfolio object
+        start_date (str or pd.Timestamp): Start date for calculation (optional).
+        end_date (str or pd.Timestamp): End date for calculation (optional).
+        
+    Returns:
+        tuple: (realised_pnl, unrealised_pnl) floats
+    """
+    prices = portfolio.data
+    start,end = get_time_interval(prices, start_date, end_date, verify_date=portfolio.verify_date)
+    
+    realised_pnl = 0.0
+    unrealised_pnl = 0.0
+    inventory = defaultdict(deque)
+    
+
+    
+    for log in portfolio.get_portfolio_log().itertuples():
+        if not (start <= log.Date <= end):
+            continue
+        
+        ticker = log.Ticker
+        quantity = log.Quantity
+        price = log.Price
+        
+        if log.Type == 'Buy':
+            inventory[ticker].append((quantity, price))
+        elif log.Type == 'Sell':
+            quantity_to_sell = quantity
+            while quantity_to_sell > 0 and inventory[ticker]:
+                
+            
+            realised_pnl += log.Quantity * log.Price
+        elif log.Type == 'Dividend':
+            realised_pnl += log.Total
+        
+
+            
+
+
+
+    
+   
+    return realised_pnl, unrealised_pnl
 
 def portfolio_returns(data, start_date=None, end_date=None):
+    #fix
     """
     Convert multi-index DataFrame to a Series of returns.
     
@@ -31,6 +80,7 @@ def portfolio_returns(data, start_date=None, end_date=None):
     
 
 def portfolio_return_float(data, start_date=None, end_date=None):
+    #fix
     """
     Calculate portfolio cumulative return between start_date and end_date.
     

@@ -92,7 +92,7 @@ class Portfolio:
         if self.assets[ticker] == 0:
             del self.assets[ticker]
         
-    def log_transaction(self, type_, date, ticker, quantity:int, price:float, total):
+    def log_transaction(self, type_:str, date, ticker, quantity:int, price:float, total):
         self.log.append({
             'Type': type_,
             'Date': date,
@@ -109,7 +109,7 @@ class Portfolio:
             next_dates = self.data.index[self.data.index > date]
             if len(next_dates) == 0:
                 print(f"No future dates available in data after {date}.")
-                return False
+                raise ValueError("No valid date found.")
             date = next_dates[0]
             print(f"Using next available date: {date.date()}")
         return date
@@ -159,12 +159,8 @@ class Portfolio:
         self.current_cash = amount
         
         #log cash justering
-        if at_date is None:
-            at_date = pd.to_datetime(at_date)
-        else:
-            at_date = pd.to_datetime(at_date)
+        at_date = pd.to_datetime(at_date) if at_date else pd.Timestamp.now()
         self.log_transaction("Cash Adjustment", at_date, "CASH", 1, difference, difference)
-        
         print(f"Current cash set to {self.current_cash:.2f}.")
     
     def adjust_cash(self, amount:float, at_date=None):
@@ -176,10 +172,8 @@ class Portfolio:
         self.current_cash += amount
         
         #log cash justering
-        if at_date is None:
-            at_date = pd.to_datetime(at_date)
-        else:
-            at_date = pd.to_datetime(at_date)
+        at_date = pd.to_datetime(at_date) if at_date else pd.Timestamp.now()
+       
         self.log_transaction("Cash Adjustment", at_date, "CASH", 1, amount, amount)
         
         print(f"Cash adjustet, new balance: {self.current_cash:.2f}.")

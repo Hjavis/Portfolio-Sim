@@ -112,13 +112,11 @@ class InterestCashFlow(CashFlow):
         
     def apply(self, portfolio) -> None:
         """Apply interest payment to portfolio"""
-        net_amount, tax = self.amount_after_tax()
+        
         self._process_payment(
             portfolio=portfolio,
-            net_amount=net_amount,
             flow_type="Interest",
-            asset_id=self.ticker,
-            tax=tax
+            asset_id=self.instrument_id,
         )
             
 
