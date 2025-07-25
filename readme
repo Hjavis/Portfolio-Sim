@@ -1,8 +1,37 @@
+# PortfolioSim - Trading Strategy Backtesting Framework
+A Python-based platform for backtesting trading strategies, analyzing portfolio performance, and simulating investment scenarios with multi-asset support.
+
+## ✨ Key Features
+
+- 📈 **Multi-Asset Portfolio Management** - Track stocks, cash positions, and transactions
+- 🤖 **Strategy Backtesting** - Test moving average, seasonal, and custom strategies
+- 📉 **Risk Analysis** - Value-at-Risk (VaR) and basic risk metrics
+- 📊 **Performance Visualization** - Visualize charts for returns and allocations
+- ⚡ **YFinance Integration** - Automatic S&P 500 data downloading
+- 🤠 **Summary & Benchmarks** - Get summary of strategy and compare with buy-hold benchmark
+
+## 📊 Core Functionality
+Component	                Description	                            Status
+Portfolio Tracking	   Holdings, cash balance, transactions	        ✅ Stable
+MA Cross Strategy	   Moving average crossover backtest	        ✅ Stable
+Seasonal Strategy	   "Sell in May" pattern implementation	        ✅ Stable
+VaR Calculation	        Historical Value-at-Risk	                🟡 Beta
+Data Pipeline	       Yahoo Finance integration	                🟡 Beta
+
+## ⚠️ Current Limitations
+- **Basic data validation needs improvement**
+- **Basic transaction cost modelling (fees, slip, etc)**
+- **Simplified VaR calculation**
+- **No portfolio optimization tools**
+- **No adjustment for inflation/currency effects**
+- **No risk-adjustet performance metric**
+
+noter:
 utils
 def plot_portfolio_return_volatility(returns, rolling_window=30):
     #skal bruge et fix
 def plot_portfolio_returns(returns):
-    #skal fixes fix
+    #skal fixes
 
 metrics
 portfolio_returns(data, start_date=None, end_date=None):
@@ -10,43 +39,12 @@ portfolio_returns(data, start_date=None, end_date=None):
 portfolio_return_float(data, start_date=None, end_date=None):
     #fix
 
-randomwalk (skal laves ordenligt)
+randomwalk(skal laves ordenligt, dårlig autocomplete er ikke engang integreret endnu)
 
-fremtidig cashflows skal discountes
+cashflow discount, 
 
 #normalfordeling VaR, covariance var senere?
 
 def first_portfolio_activity og set som default på mange utils og metrics
 
 ABC Abstract, Property, Deque 
-
-
-# Simple Portfolio Management and Backtesting System
-
-A Python-based toolkit for simulating and analyzing trading strategies, managing portfolios, and evaluating performance against benchmarks.
-
-## Features
-- **Portfolio Management**: Track holdings, cash, transactions, and performance metrics (VaR, PnL).  
-- **Backtesting Engine**: Test moving-average strategies against historical data.  
-- **Cash Flow System**: Model dividends, derivatives, and interest payments with tax-aware calculations.  
-- **Data Pipeline**: Fetch S&P 500 stock data via Yahoo Finance (YFinance) and store locally.  
-- **Visualization**: Plot portfolio allocations, sector distributions, and strategy performance.  
-
-## Key Technologies  
-- **Python** (Pandas, NumPy, Matplotlib)  
-- **OOP Design** (Abstract Classes, Type Hints)  
-- **Financial Metrics** (VaR, Rolling Volatility, Cumulative Returns)  
-- **YFinance API** for market data  
-
-## Example Use Case  
-```python
-from portfolio import Portfolio  
-from backtest import BackTester  
-
-# Initialize portfolio and backtest a moving-average strategy  
-pf = Portfolio(name="Demo", data=data, starting_cash=100000)  
-pf.buy_asset("AAPL", 10, at_date="2020-01-01")  
-backtester = BackTester(pf)  
-backtester.moving_average_strategy_full("AAPL", window=30)  
-
-
