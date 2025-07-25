@@ -9,12 +9,13 @@ sp500 = tables[0]
 sp500_tickers = sp500['Symbol'].tolist()
 
 tickers = sp500_tickers  # altid brug tickers, ikke sp500 tickers eller c25 ticker osv. for kompatibilitet brug altid 'tickers'"
+local_save_path = 'data/yfinancedata'
 
-def download_and_save_data(save_path='Sim/tickerdata.csv'):
+def download_and_save_data(save_path=local_save_path):
     if os.path.exists(save_path):
         print("Data already downloaded.")
         return  # Don’t download
-
+    
     tickerdata = yf.download(tickers, start="2015-01-01", end="2025-07-23", group_by='ticker')
 
     sectors = {}
@@ -44,11 +45,11 @@ def download_and_save_data(save_path='Sim/tickerdata.csv'):
 
     tickerdata = tickerdata.reindex(columns=pd.MultiIndex.from_tuples(new_cols))
 
-    os.makedirs('Sim', exist_ok=True)
+    os.makedirs('data/yfinancedata', exist_ok=True)
     tickerdata.to_csv(save_path)
     print(f"Data saved to {save_path}")
 
-def load_data(file_path='Sim/tickerdata.csv'):
+def load_data(file_path=local_save_path):
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File {file_path} does not exist.")
     

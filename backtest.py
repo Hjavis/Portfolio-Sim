@@ -7,15 +7,15 @@ from portfolio import Portfolio
 class BackTester:
     def __init__(self, portfolio: Portfolio):
         self.portfolio = portfolio
+        self.initial_cash = portfolio.starting_cash
         
     def moving_average_strat(self, ticker, window: int = 30, start_date=None, end_date = None):
         """Backtests a MA-strategy on a given ticker in your portfolio"""
-        initial_cash = self.portfolio.current_cash
-        data = self.portfolio.data[ticker]['Close'].loc[start_date:end_date]        
-        ma = data.rolling(window).mean()
+        data_series = self.portfolio.data_series[ticker]['Close'].loc[start_date:end_date]        
+        ma = data_series.rolling(window).mean()
         
-        tradesignal = pd.DataFrame(index=data.index)
-        tradesignal['price'] = data
+        tradesignal = pd.DataFrame(index=data_series.index)
+        tradesignal['price'] = data_series
         tradesignal['ma'] = ma
         tradesignal['signal'] = 0 #0 = hold, 1=buy_asset, -1=sell_asset
         
@@ -37,6 +37,27 @@ class BackTester:
                     self.portfolio.sell_asset(ticker, held_shares, at_date=idx)
         return tradesignal
                     
+    def sell_in_may_and_go_away_strategy(self, ticker, start_date = None, end_date=None):
+        """Backtests the questionable strategy of selling in may, and then going away. A strategy my grandfather swears by"""
+        data_series = self.portfolio.data[ticker]['Close'].loc[start_date:end_date]
+        
+
+        tradesignal = pd.DataFrame(index=data_series.index)
+        tradesignal['price'] = data_series
+
+        #Sell in may and go away, køb igen 1. november
+        ismay_to_oct = (tradesignal.index.month >= 5) & (tradesignal.index.month <= 10)
+
+        #filtrer ved at typecast booleanmask som int
+        tradesignal['signal'] = ismay_to_oct.astype(int)
+        
+        for idx, row in tradesignal.iterrows():
+            if row['signal'] == 0: #Køb
+                self.buy_max(ticker, row['price'], idx)
+            if row['signal'] == 1: #Sælg
+                self.sell_all(ticker, idx)
+        return tradesignal
+    
 
     def strategy_summary(self, ticker: str, initial_cash: float = None) -> None:
         """
@@ -113,3 +134,19 @@ class BackTester:
         self.strategy_summary(ticker, self.portfolio.starting_cash)
         self.generate_performance_report(signals, ticker)
         return signals
+    
+    def sell_in_may_and_go_away_strategy_full(self, ticker):
+        signals = self.sell_in_may_and_go_away_strategy(ticker)
+        self.strategy_summary(ticker, self.portfolio.starting_cash)
+        self.generate_performance_report(signals, ticker)
+        return signals
+    
+    def buy_max(self,ticker, price, date):
+        max_shares = int(self.portfolio.current_cash / price)
+        if max_shares > 0:
+            self.portfolio.buy_asset(ticker, max_shares, at_date=date)
+
+    def sell_all(self, ticker, date):
+        shares = self.portfolio.get_asset_quantity[ticker]
+        if shares > 0:
+            self.portfolio.sell_asset(ticker,quantity=shares, at_date=date)

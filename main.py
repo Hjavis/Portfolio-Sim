@@ -1,10 +1,10 @@
 from download_data import tickers, download_and_save_data, load_data
 download_and_save_data()
-data = load_data("Sim/tickerdata.csv")
+data = load_data()
 
 
 from portfolio import Portfolio
-pf = Portfolio(name="test", data=data, starting_cash=100000)
+pf = Portfolio(name="Hja", data=data, starting_cash=100000)
 
 from backtest import BackTester
 
@@ -35,7 +35,7 @@ import pandas as pd
 #plot_portfolio_return_volatility(portfolio_returns(data, start_date='2018-01-01', end_date='2024-01-01'), rolling_window=40)
 
 print(data.columns)
-# Example usage of the Portfolio class
+
 pf.buy_asset('AAPL', 10, at_date='2016-01-05')
 pf.buy_asset('GOOGL', 155, at_date='2016-05-05')
 pf.buy_asset('TSLA', 241, at_date='2018-04-15')
