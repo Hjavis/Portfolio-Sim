@@ -3,30 +3,41 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 
 ## ✨ Key Features
 
-- 📈 **Multi-Asset Portfolio Management** - Track stocks, cash positions, and transactions
-- 🤖 **Strategy Backtesting** - Test moving average, seasonal, and custom strategies
-- 📉 **Risk Analysis** - Value-at-Risk (VaR) and basic risk metrics
-- 📊 **Performance Visualization** - Visualize charts for returns and allocations
-- ⚡ **YFinance Integration** - Automatic S&P 500 data downloading
-- 🤠 **Summary & Benchmarks** - Get summary of strategy and compare with buy-hold benchmark
+- 📈 **Multi-Asset Portfolio Management** - Track stocks, cash positions, and transactions  
+- 🤖 **Strategy Backtesting** - Test moving average, seasonal, and custom strategies  
+- 📉 **Risk Analysis** - Value-at-Risk (VaR) and basic risk metrics  
+- 📊 **Performance Visualization** - Interactive charts for returns and allocations  
+- ⚡ **YFinance Integration** - Automatic S&P 500 data downloading  
+- 🏆 **Summary & Benchmarks** - Compare strategies against buy-hold performance  
 
-## 📊 Core Functionality
-Component	                Description	                            Status
-Portfolio Tracking	   Holdings, cash balance, transactions	        ✅ Stable
-MA Cross Strategy	   Moving average crossover backtest	        ✅ Stable
-Seasonal Strategy	   "Sell in May" pattern implementation	        ✅ Stable
-VaR Calculation	        Historical Value-at-Risk	                🟡 Beta
-Data Pipeline	       Yahoo Finance integration	                🟡 Beta
+## 🛠 Core Functionality
+
+| Component            | Description                              | Status       |
+|----------------------|------------------------------------------|--------------|
+| **Portfolio Tracking** | Holdings, cash balance, transactions    | ✅ Stable     |
+| **MA Cross Strategy** | Moving average crossover backtest       | ✅ Stable     |
+| **Seasonal Strategy** | "Sell in May" pattern implementation    | ✅ Stable     |
+| **VaR Calculation**   | Historical Value-at-Risk                | 🟡 Beta       |
+| **Data Pipeline**     | Yahoo Finance integration               | 🟡 Beta       |
 
 ## ⚠️ Current Limitations
-- **Basic data validation needs improvement**
-- **Basic transaction cost modelling (fees, slip, etc)**
-- **Simplified VaR calculation**
-- **No portfolio optimization tools**
-- **No adjustment for inflation/currency effects**
-- **No risk-adjustet performance metric**
+**Data Validation**
+🧩 Basic data validation needs improvement
 
-noter:
+**Transaction Costs** 
+💸 Simplified transaction costs (no fees/slippage modeling)
+
+**Risk Modeling**  
+📉 Basic VaR calculation (historical simulation only)
+
+**Inflation Adjustment** 
+💹 No inflation/currency adjustment
+
+**Risk adjusted performance metric**
+📐 Missing risk-adjusted metrics
+
+
+noter til mig selv:
 utils
 def plot_portfolio_return_volatility(returns, rolling_window=30):
     #skal bruge et fix
