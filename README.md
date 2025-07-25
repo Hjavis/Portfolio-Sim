@@ -20,7 +20,7 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 | **VaR Calculation**   | Historical Value-at-Risk                | 🟡 Beta       |
 | **Data Pipeline**     | Yahoo Finance integration               | 🟡 Beta       |
 
-## ⚠️ Current Limitations
+## ⚠️ Current Limitations & Upcomming fixes
 **Data Validation**         
 🧩 Basic data validation needs improvement
 
