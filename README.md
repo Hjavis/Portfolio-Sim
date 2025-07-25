@@ -1,0 +1,60 @@
+# PortfolioSim - Trading Strategy Backtesting Framework
+A Python-based platform for backtesting trading strategies, analyzing portfolio performance, and simulating investment scenarios with multi-asset support.
+
+## ✨ Key Features
+
+- 📈 **Multi-Asset Portfolio Management** - Track stocks, cash positions, and transactions  
+- 🤖 **Strategy Backtesting** - Test moving average, seasonal, and custom strategies  
+- 📉 **Risk Analysis** - Value-at-Risk (VaR) and basic risk metrics  
+- 📊 **Performance Visualization** - Interactive charts for returns and allocations  
+- ⚡ **YFinance Integration** - Automatic S&P 500 data downloading  
+- 🏆 **Summary & Benchmarks** - Compare strategies against buy-hold performance  
+
+## 🛠 Core Functionality
+
+| Component            | Description                              | Status       |
+|----------------------|------------------------------------------|--------------|
+| **Portfolio Tracking** | Holdings, cash balance, transactions    | ✅ Stable     |
+| **MA Cross Strategy** | Moving average crossover backtest       | ✅ Stable     |
+| **Seasonal Strategy** | "Sell in May" pattern implementation    | ✅ Stable     |
+| **VaR Calculation**   | Historical Value-at-Risk                | 🟡 Beta       |
+| **Data Pipeline**     | Yahoo Finance integration               | 🟡 Beta       |
+
+## ⚠️ Current Limitations
+**Data Validation**
+🧩 Basic data validation needs improvement
+
+**Transaction Costs** 
+💸 Simplified transaction costs (no fees/slippage modeling)
+
+**Risk Modeling**  
+📉 Basic VaR calculation (historical simulation only)
+
+**Inflation Adjustment** 
+💹 No inflation/currency adjustment
+
+**Risk adjusted performance metric**
+📐 Missing risk-adjusted metrics
+
+noter:
+utils
+def plot_portfolio_return_volatility(returns, rolling_window=30):
+    #skal bruge et fix
+def plot_portfolio_returns(returns):
+    #skal fixes
+
+metrics
+portfolio_returns(data, start_date=None, end_date=None):
+    #fix
+portfolio_return_float(data, start_date=None, end_date=None):
+    #fix
+
+randomwalk(skal laves ordenligt, dårlig autocomplete er ikke engang integreret endnu)
+
+cashflow discount, 
+
+#normalfordeling VaR, covariance var senere?
+
+def first_portfolio_activity og set som default på mange utils og metrics
+
+ABC Abstract, Property, Deque 
