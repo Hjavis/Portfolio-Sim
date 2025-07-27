@@ -102,30 +102,8 @@ def simple_historical_var(Portfolio, confidence_level=0.95, lookback_days=100) -
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def portfolio_returns(data, start_date=None, end_date=None):
-    #fix
+def portfolio_returns(portfolio, start_date=None, end_date=None):
+    #? fix
     """
     Convert multi-index DataFrame to a Series of returns.
     
@@ -136,20 +114,22 @@ def portfolio_returns(data, start_date=None, end_date=None):
         pd.Series: Returns of the portfolio.
     """
     if start_date:
-        data = data.loc[data.index >= pd.to_datetime(start_date)]
+        portfolio.data = portfolio.data.loc[portfolio.data.index >= pd.to_datetime(start_date)]
     if end_date:
-        data = data.loc[data.index <= pd.to_datetime(end_date)]
+        portfolio.data = portfolio.data.loc[portfolio.data.index <= pd.to_datetime(end_date)]
 
-    close_prices = data.xs('Close', level=1, axis=1)
+    close_prices = portfolio.data.xs('Close', level=1, axis=1)
     daily_returns = close_prices.pct_change().dropna()
-    weights = pd.Series(Portfolio)
+
+    total_value = sum(portfolio.get_asset_value(ticker for ticker in portfolio.assets))
+    weights = {ticker: portfolio.get_asset_value(ticker)/ total_value for ticker in portfolio.assets}
 
     portfolio_daily_returns = daily_returns.dot(weights)
     return portfolio_daily_returns
     
 
-def portfolio_return_float(data, start_date=None, end_date=None):
-    #fix
+def portfolio_return_float(portfolio, start_date=None, end_date=None):
+    #? fix
     """
     Calculate portfolio cumulative return between start_date and end_date.
     
@@ -163,12 +143,12 @@ def portfolio_return_float(data, start_date=None, end_date=None):
         float: cumulative portfolio return (example: 0.15 for +15%).
     """
     if start_date:
-        data = data.loc[data.index >= pd.to_datetime(start_date)]
+        portfolio.data = portfolio.data.loc[portfolio.data.index >= pd.to_datetime(start_date)]
     if end_date:
-        data = data.loc[data.index <= pd.to_datetime(end_date)]
+       portfolio.data = portfolio.data.loc[portfolio.data.index <= pd.to_datetime(end_date)]
     
     #Close 
-    close_prices = pd.DataFrame({ticker: data[(ticker, 'Close')] for ticker in Portfolio})
+    close_prices = pd.DataFrame({ticker: portfolio.data[(ticker, 'Close')] for ticker in portfolio.assets})
     
     # Normalize prices to start at 1
     normalized = close_prices / close_prices.iloc[0]

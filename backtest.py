@@ -11,39 +11,43 @@ class BackTester:
         
     def moving_average_strat(self, ticker, window: int = 30, start_date=None, end_date = None):
         """Backtests a MA-strategy on a given ticker in your portfolio"""
-        data_series = self.portfolio.data_series[ticker]['Close'].loc[start_date:end_date]        
+        if ticker not in self.portfolio.data.columns.get_level_values(0):
+            raise ValueError(f'Ticker {ticker} was not found in portfolio data')
+        
+        data_series = self.portfolio.data[ticker]['Close'].loc[start_date:end_date]        
         ma = data_series.rolling(window).mean()
         
         tradesignal = pd.DataFrame(index=data_series.index)
         tradesignal['price'] = data_series
         tradesignal['ma'] = ma
         tradesignal['signal'] = 0 #0 = hold, 1=buy_asset, -1=sell_asset
-        
+        tradesignal['returns'] = tradesignal['price'].pct_change()
+
         #hvornår skal der gennemføres handler
         tradesignal['signal'][window:] = np.where(tradesignal['price'][window:] > tradesignal['ma'][window:], 1, -1)
         tradesignal['positions_change'] = tradesignal['signal'].diff() #Kigger efter hvornår der sker en ændring
         
-        tradesignal['returns'] = tradesignal['price'].pct_change()
+       
+
         #simulere trades
         for idx, row in tradesignal.iterrows():
             if row['positions_change'] == 2: #skift fra -1 til 1 (køb)
-                max_shares_afford = int(self.portfolio.current_cash / row['price'])
-                if max_shares_afford > 0:
-                    self.portfolio.buy_asset(ticker, max_shares_afford, at_date=idx)
-                    
+                self.buy_max(ticker,row['price'],idx)
             elif row['positions_change'] == -2: #skift fra 1 til -1 (salg)
-                held_shares = self.portfolio.get_asset_quantity(ticker)
-                if held_shares > 0:
-                    self.portfolio.sell_asset(ticker, held_shares, at_date=idx)
+                self.sell_all(ticker,idx)
         return tradesignal
                     
     def sell_in_may_and_go_away_strategy(self, ticker, start_date = None, end_date=None):
         """Backtests the questionable strategy of selling in may, and then going away. A strategy my grandfather swears by"""
+        if ticker not in self.portfolio.data.columns.get_level_values(0):
+            raise ValueError(f'Ticker {ticker} was not found in portfolio data')
+        
         data_series = self.portfolio.data[ticker]['Close'].loc[start_date:end_date]
         
 
         tradesignal = pd.DataFrame(index=data_series.index)
         tradesignal['price'] = data_series
+        tradesignal['returns'] = tradesignal['price'].pct_change() #returns for hver dag
 
         #Sell in may and go away, køb igen 1. november
         ismay_to_oct = (tradesignal.index.month >= 5) & (tradesignal.index.month <= 10)
@@ -108,7 +112,7 @@ class BackTester:
             
     def generate_performance_report(self, signals: pd.DataFrame, ticker: str):
         """
-        Analyserer strategiens afkast og sammenligner med buy-and-hold."""
+        Compares against buy-hold strategy"""
         strategy_returns = signals['returns'] * signals['signal'].shift(1)
         cumulative_strategy = (1 + strategy_returns).cumprod()  #kumuleret afkast fra strategien
         
@@ -147,6 +151,6 @@ class BackTester:
             self.portfolio.buy_asset(ticker, max_shares, at_date=date)
 
     def sell_all(self, ticker, date):
-        shares = self.portfolio.get_asset_quantity[ticker]
+        shares = self.portfolio.get_asset_quantity(ticker)
         if shares > 0:
             self.portfolio.sell_asset(ticker,quantity=shares, at_date=date)

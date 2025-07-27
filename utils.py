@@ -130,12 +130,12 @@ def plot_sector_distribution(portfolio):
     Returns:
     None
     """
-    tickers = portfolio.columns.levels[0]
+    tickers = portfolio.data.columns.levels[0]
     
     sectors = []
     for ticker in tickers:
-        if ('Sector' in portfolio[ticker].columns):
-            sector_val = portfolio[(ticker, 'Sector')].dropna().iloc[0]
+        if 'Sector' in portfolio.data.columns:
+            sector_val = portfolio.data[(ticker, 'Sector')].dropna().iloc[0]
             sectors.append(sector_val)
         else:
             sectors.append('Unknown')

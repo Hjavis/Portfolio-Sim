@@ -93,6 +93,11 @@ class Portfolio:
             del self.assets[ticker]
         
     def log_transaction(self, type_:str, date, ticker, quantity:int, price:float, total):
+        if type_ == 'Buy':
+            total = -abs(total) #altid negativt
+        if type_ =='Sell':
+            total = abs(total) #altid positvt
+
         self.log.append({
             'Type': type_,
             'Date': date,
@@ -107,8 +112,8 @@ class Portfolio:
         return pd.DataFrame(self.log)
     
     def print_portfolio_log(self, n=5):
-        log = Portfolio.get_portfolio_log()
-        print(log[log['Type'].isin(['Buy', 'Sell'])].tail(n))
+        log = self.get_portfolio_log()
+        print(log.tail(n))
         
     def verify_date(self, date) -> pd.Timestamp:
         """Checks if the given date is in the data index, if not, returns the next available date."""
@@ -122,38 +127,6 @@ class Portfolio:
             print(f"Using next available date: {date.date()}")
         return date
     
-    def calculate_var(self, confidence_level=0.95, lookback_days=100) -> float:
-        """
-        Calculates portfolio Value at Risk (VaR) using historical simulation.
-
-        Args:
-            confidence_level (float): Confidence level for VaR (e.g. 0.95 for 95% VaR).
-            lookback_days (int): Number of past trading days to use.
-
-        Returns:
-            float: Estimated daily VaR.
-        """
-        if not self.assets:
-            print("No assets in portfolio.")
-            return 0.0
-
-        returns = []
-        for ticker, quantity in self.assets.items():
-            if (ticker, 'Close') not in self.data.columns:
-                continue
-            price_series = self.data[(ticker, 'Close')].dropna()
-            daily_returns = price_series.pct_change().dropna()
-            weighted_returns = daily_returns[-lookback_days:] * quantity * price_series.iloc[-1]
-            returns.append(weighted_returns)
-
-        if not returns:
-            print("No valid return data.")
-            return 0.0
-
-        portfolio_returns_series = pd.concat(returns, axis=1).sum(axis=1)
-        var = -np.percentile(portfolio_returns_series, (1 - confidence_level) * 100)
-        print(f"{int(confidence_level*100)}% 1-day Historical VaR: ${var:.2f}")
-        return var
         
     def get_portfolio_value(self) -> float:
         """Calculates the total value of the portfolio based on current prices."""
