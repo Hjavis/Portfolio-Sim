@@ -228,8 +228,8 @@ def get_time_interval(
     return start, end
     
 
-def plot_portfolio_returns(returns):
-    #fix
+def plot_returns(returns):
+    
     """
     Plots the cumulative returns of the portfolio.
     

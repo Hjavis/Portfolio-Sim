@@ -1,5 +1,5 @@
 from typing import Optional
-from abc import ABC, abstractmethod, property
+from abc import ABC, abstractmethod
 import pandas as pd
 
 class CashFlow(ABC):
