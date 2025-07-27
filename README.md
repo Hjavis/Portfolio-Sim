@@ -23,7 +23,7 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 
 
 ## Example usage
-
+ ```python
 #Data
 tickers, sectors= fetch_sp500_tickers()
 download_and_save_data(tickers,sectors)
@@ -109,7 +109,7 @@ pf_cfm.print_cash_flow_manager()
 #filtrér cashflows udfra type
 derivcf = pf_cfm.get_flows_by_type(DerivativeCashFlow)
 dividendcf = pf_cfm.get_flows_by_type(DividendCashFlow)
-
+``` 
 
 ## ⚠️ Current Limitations & Upcomming fixes
 **Data Validation**         
