@@ -134,10 +134,13 @@ class CashFlowManager:
     def apply_cash_flows(self, portfolio, up_to_date: Optional[str] = None) -> None:
         """Apply all cash flows up to a certain date"""
         up_to_date = pd.to_datetime(up_to_date) if up_to_date else pd.Timestamp.now()
-        
+    
+
         for cf in sorted(self.cash_flows, key=lambda x: x.date):
             if cf.date <= up_to_date and not cf.applied:
                 cf.apply(portfolio)
+        
+        
                 
     def get_total_pending(self) -> float:
         """Get sum of all cash flows not yet applied"""
@@ -146,3 +149,46 @@ class CashFlowManager:
     def get_flows_by_type(self, flow_type: type) -> list:
         """Get all cash flows of a specific type"""
         return [cf for cf in self.cash_flows if isinstance(cf, flow_type)]
+    
+    def print_cash_flow_manager(self, show_applied: bool = False):
+        if not self.cash_flows:
+            print("No cash flows in manager.")
+            return
+            
+
+        rows = []
+        for i, cf in enumerate(sorted(self.cash_flows, key=lambda x: x.date), 1):
+            if not show_applied and cf.applied:
+                continue
+                
+            cf_type = cf.__class__.__name__.replace("CashFlow", "")
+            amount = f"{cf.amount:+,.2f}"
+            status = "Applied" if cf.applied else "Pending"
+            date = cf.date.strftime("%Y-%m-%d")
+            
+            # Ekstra details omkring cashflow
+            details = ""
+            if isinstance(cf, DividendCashFlow):
+                details = f"{cf.ticker} ({cf.metadata.get('payment_type', '')})"
+            elif isinstance(cf, DerivativeCashFlow):
+                details = f"{cf.contract_id} ({cf.metadata.get('contract_type', '')})"
+            elif isinstance(cf, InterestCashFlow):
+                details = f"{cf.instrument_id} ({cf.metadata.get('accrual_period', '')})"
+            
+            rows.append([i, cf_type, date, amount, status, details])
+        
+        # Header
+        print("\nCash Flow Manager Summary")
+        print("-" * 80)
+        print(f"{'#':<3} | {'Type':<12} | {'Date':<10} | {'Amount':>12} | {'Status':<8} | Details")
+        print("-" * 80)
+        
+        # Rækker
+        for row in rows:
+            print(f"{row[0]:<3} | {row[1]:<12} | {row[2]:<10} | {row[3]:>12} | {row[4]:<8} | {row[5]}")
+        
+        # Summary
+        print("-" * 80)
+        pending = sum(cf.amount for cf in self.cash_flows if not cf.applied)
+        applied = sum(cf.amount for cf in self.cash_flows if cf.applied)
+        print(f"Total Pending: {pending:+,.2f} | Total Applied: {applied:+,.2f} | Total: {pending+applied:+,.2f}")

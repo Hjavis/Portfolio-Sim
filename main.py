@@ -76,6 +76,23 @@ pf.print_portfolio_log()
 cf1 = DividendCashFlow(amount=750, ticker='KO', date='2023-03-03', tax_rate=0.27)
 cf2 = InterestCashFlow('ID:123', 52.5, '2025-01-03')
 cf3 = DerivativeCashFlow('OPT_AAPL_20231212_C170', strike_price= 170, amount=5734, date='2023-12-12')
+cf4 = DividendCashFlow(amount=1337, ticker='KO', date='2026-03-03', tax_rate=0.27)
 
-cfm = CashFlowManager()
-cfm.add_cash_flow(cf1,cf2,cf3)
+#lav en CFM som kan holde styr på cashflows til vores portefølje "pf", eller hvilken som helst anden.
+pf_cfm = CashFlowManager()
+pf_cfm.add_cash_flow(cf1)
+pf_cfm.add_cash_flow(cf2)
+pf_cfm.add_cash_flow(cf3)
+pf_cfm.add_cash_flow(cf4)
+
+#Print CashFlowManager
+pf_cfm.print_cash_flow_manager()
+
+
+#Apply alle, pånær cf4 som først er i 2026
+pf_cfm.apply_cash_flows(pf, up_to_date=pd.to_datetime('today'))
+pf_cfm.print_cash_flow_manager()
+
+#filtrér cashflows udfra type
+derivcf = pf_cfm.get_flows_by_type(DerivativeCashFlow)
+dividendcf = pf_cfm.get_flows_by_type(DividendCashFlow)
