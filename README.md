@@ -21,7 +21,7 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 | **Data Pipeline**     | Yahoo Finance integration               | 🟡 Beta       |
 
 ## ⚠️ Current Limitations
-**Data Validation**
+**Data Validation**          
 🧩 Basic data validation needs improvement
 
 **Transaction Costs** 

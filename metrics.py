@@ -1,7 +1,7 @@
 import pandas as pd
 from portfolio import Portfolio
-from download_data import download_and_save_data, load_data
-from utils import plot_portfolio, plot_sector_distribution, get_time_interval
+
+from utils import get_time_interval
 from collections import defaultdict, deque
 
 
@@ -23,7 +23,7 @@ def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
     
     realised_pnl = 0.0
     unrealised_pnl = 0.0
-    inventory = defaultdict(deque)
+    inventory = defaultdict(deque) #fifo
     
     for log in portfolio.get_portfolio_log().itertuples():
         if not (start <= log.Date <= end):
@@ -87,7 +87,7 @@ def portfolio_returns(data, start_date=None, end_date=None):
 
     close_prices = data.xs('Close', level=1, axis=1)
     daily_returns = close_prices.pct_change().dropna()
-    weights = pd.Series(portfolio)
+    weights = pd.Series(Portfolio)
 
     portfolio_daily_returns = daily_returns.dot(weights)
     return portfolio_daily_returns
@@ -113,13 +113,13 @@ def portfolio_return_float(data, start_date=None, end_date=None):
         data = data.loc[data.index <= pd.to_datetime(end_date)]
     
     # Extract Close prices for portfolio tickers
-    close_prices = pd.DataFrame({ticker: data[(ticker, 'Close')] for ticker in portfolio})
+    close_prices = pd.DataFrame({ticker: data[(ticker, 'Close')] for ticker in Portfolio})
     
     # Normalize prices to start at 1
     normalized = close_prices / close_prices.iloc[0]
     
     # Calculate weighted returns over time
-    weighted_returns = normalized.mul(pd.Series(portfolio), axis=1).sum(axis=1)
+    weighted_returns = normalized.mul(pd.Series(Portfolio), axis=1).sum(axis=1)
     cum_return = weighted_returns.iloc[-1] - 1
     return cum_return
 
