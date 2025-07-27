@@ -150,8 +150,8 @@ class Portfolio:
             print("No valid return data.")
             return 0.0
 
-        portfolio_returns = pd.concat(returns, axis=1).sum(axis=1)
-        var = -np.percentile(portfolio_returns, (1 - confidence_level) * 100)
+        portfolio_returns_series = pd.concat(returns, axis=1).sum(axis=1)
+        var = -np.percentile(portfolio_returns_series, (1 - confidence_level) * 100)
         print(f"{int(confidence_level*100)}% 1-day Historical VaR: ${var:.2f}")
         return var
         

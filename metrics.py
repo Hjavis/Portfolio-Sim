@@ -1,9 +1,8 @@
 import pandas as pd
+import numpy as np
 from portfolio import Portfolio
-
 from utils import get_time_interval
 from collections import defaultdict, deque
-
 
 
 def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
@@ -67,6 +66,62 @@ def portfolio_pnl(portfolio, start_date=None, end_date=None) -> tuple[float]:
     
     return realised_pnl, unrealised_pnl
 
+def simple_historical_var(Portfolio, confidence_level=0.95, lookback_days=100) -> float:
+        """
+        Calculates portfolio Value at Risk (VaR) using historical simulation.
+        Assumes that quantity of assets are constant over the lookback_days period.
+        Args:
+            confidence_level (float): Confidence level for VaR (e.g. 0.95 for 95% VaR).
+            lookback_days (int): Number of past trading days to use.
+
+        Returns:
+            float: Estimated daily VaR.
+        """
+        if not Portfolio.assets:
+            print("No assets in portfolio.")
+            return 0.0
+
+        returns = []
+        for ticker, quantity in Portfolio.assets.items():
+            if (ticker, 'Close') not in Portfolio.data.columns:
+                continue
+            price_series = Portfolio.data[(ticker, 'Close')].dropna()
+            daily_returns = price_series.pct_change().dropna()
+            weighted_returns = daily_returns[-lookback_days:] * quantity * price_series.iloc[-1]
+            returns.append(weighted_returns)
+
+        if not returns:
+            print("No valid return data.")
+            return 0.0
+
+        portfolio_returns_series = pd.concat(returns, axis=1).sum(axis=1)
+        var = -np.percentile(portfolio_returns_series, (1 - confidence_level) * 100)
+        print(f"{int(confidence_level*100)}% 1-day Historical VaR: ${var:.2f}")
+        return var
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def portfolio_returns(data, start_date=None, end_date=None):
@@ -112,7 +167,7 @@ def portfolio_return_float(data, start_date=None, end_date=None):
     if end_date:
         data = data.loc[data.index <= pd.to_datetime(end_date)]
     
-    # Extract Close prices for portfolio tickers
+    #Close 
     close_prices = pd.DataFrame({ticker: data[(ticker, 'Close')] for ticker in Portfolio})
     
     # Normalize prices to start at 1
