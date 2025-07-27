@@ -6,7 +6,8 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 - 📈 **Multi-Asset Portfolio Management** - Track stocks, cash positions, and transactions  
 - 🤖 **Strategy Backtesting** - Test moving average, seasonal, and custom strategies  
 - 📉 **Risk Analysis** - Value-at-Risk (VaR) and basic risk metrics  
-- 📊 **Performance Visualization** - Interactive charts for returns and allocations  
+- 📊 **Performance Visualization** - Interactive charts for returns and allocations 
+- 💰 **Cash Flow Handling** - Cash flow managing system 
 - ⚡ **YFinance Integration** - Automatic S&P 500 data downloading  
 - 🏆 **Summary & Benchmarks** - Compare strategies against buy-hold performance  
 
