@@ -119,9 +119,6 @@ dividendcf = pf_cfm.get_flows_by_type(DividendCashFlow)
 **Transaction Costs**          
 💸 Simplified transaction costs (no fees/slippage modeling)
 
-**Risk Modeling**  
-📉 Basic VaR calculation (historical simulation only)
-
 **Inflation Adjustment**   
 💹 No inflation/currency adjustment
 
