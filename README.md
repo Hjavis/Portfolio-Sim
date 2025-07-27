@@ -20,23 +20,29 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 | **VaR Calculation**   | Historical Value-at-Risk                | 🟡 Beta       |
 | **Data Pipeline**     | Yahoo Finance integration               | 🟡 Beta       |
 
-## ⚠️ Current Limitations
-**Data Validation**          
+## ⚠️ Current Limitations & Upcomming fixes
+**Data Validation**         
 🧩 Basic data validation needs improvement
 
-**Transaction Costs** 
+**Transaction Costs**          
 💸 Simplified transaction costs (no fees/slippage modeling)
 
 **Risk Modeling**  
 📉 Basic VaR calculation (historical simulation only)
 
-**Inflation Adjustment** 
+**Inflation Adjustment**   
 💹 No inflation/currency adjustment
 
-**Risk adjusted performance metric**
+**Risk adjusted performance metric**           
 📐 Missing risk-adjusted metrics
 
-noter:
+
+
+
+
+
+
+noter til mig selv
 utils
 def plot_portfolio_return_volatility(returns, rolling_window=30):
     #skal bruge et fix
