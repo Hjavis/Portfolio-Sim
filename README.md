@@ -20,7 +20,7 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 | **Seasonal Strategy** | "Sell in May" pattern implementation    | ✅ Stable     |
 | **VaR Calculation**   | Historical Value-at-Risk                | ✅ Stable     |
 | **Data Pipeline**     | Yahoo Finance integration               | ✅ Stable     |
-| **Montecarlo&stochastic**     | Yahoo Finance integration       |  ❌ Not done yet   |
+| **Montecarlo&stochastic**     | Soon to be implemented   |  ❌ Not done yet   |
 
 
 ## Example usage
