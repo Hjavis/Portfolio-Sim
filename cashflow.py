@@ -135,7 +135,6 @@ class CashFlowManager:
         """Apply all cash flows up to a certain date"""
         up_to_date = pd.to_datetime(up_to_date) if up_to_date else pd.Timestamp.now()
     
-
         for cf in sorted(self.cash_flows, key=lambda x: x.date):
             if cf.date <= up_to_date and not cf.applied:
                 cf.apply(portfolio)
