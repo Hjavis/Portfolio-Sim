@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from riskmetrics import RiskMetrics
+
 
 class Portfolio:
     def __init__(self, name, data, starting_cash=100000):
@@ -31,6 +33,7 @@ class Portfolio:
     
     def __repr__(self):
         return f"Portfolio(name='{self.name}', cash={self.current_cash:.2f}, holdings={len(self.assets)})"
+        
 
     def buy_asset(self, ticker, quantity:int, at_date=None, open=False):
         """_summary_
@@ -151,6 +154,54 @@ class Portfolio:
             quantity = self.assets[ticker]
             price = self.data[(ticker, 'Close')].iloc[-1]
             return quantity * price
+        
+    def portfolio_returns(self, start_date=None, end_date=None):
+        """
+        Calculate portfolio returns based on current holdings and price data.
+        
+        Args:
+            start_date: Optional start date for the return series
+            end_date: Optional end date for the return series
+            
+        Returns:
+            pd.Series: Daily returns of the portfolio
+        """
+        # Filtrér
+        data = self.data.copy()
+        if start_date:
+            data = data.loc[data.index >= pd.to_datetime(start_date)]
+        if end_date:
+            data = data.loc[data.index <= pd.to_datetime(end_date)]
+        
+        close_prices = data.xs('Close', level=1, axis=1)
+        daily_returns = close_prices.pct_change().dropna()
+        
+        
+        if daily_returns.empty:
+            return pd.Series(dtype=float)
+        
+        # Beregn nuværende weights baseret på self.assets
+        current_prices = {ticker: data[(ticker, 'Close')].iloc[-1] 
+                        for ticker in self.assets}
+        weights = {ticker: self.assets[ticker] * current_prices[ticker] 
+                for ticker in self.assets}
+        total_value = sum(weights.values())
+        
+        # 
+        if total_value == 0:
+            return pd.Series(0, index=daily_returns.index)
+        
+        # Normalisér weights
+        weights = {t: w/total_value for t, w in weights.items()}
+        # Match med deres respektive tickers
+        valid_tickers = [t for t in weights.keys() if t in daily_returns.columns]
+        
+        #tag daglige returns enten positive eller negative for hver ticker, og gang dem med deres respektive vægt i porteføljen. ved at tage prikproduktet
+        if valid_tickers:
+            weights_series = pd.Series(weights)[valid_tickers]
+            return daily_returns[valid_tickers].dot(weights_series)
+        else:
+            return pd.Series(0, index=daily_returns.index)
     
 
     def reset_portfolio(self):
@@ -188,4 +239,34 @@ class Portfolio:
         
         print(f"Cash adjustet, new balance: {self.current_cash:.2f}.")
     
+    def calculate_risk_metrics(self, risk_free_rate=0.0):
+        """
+        Calculate comprehensive risk metrics for the portfolio
+        
+        Args:
+            benchmark_returns: Optional Series of benchmark returns
+            risk_free_rate: Annual risk-free rate (default 0)
+            
+        Returns:
+            Dictionary of risk metrics
+        """
+        returns = self.portfolio_returns()
+        if returns.empty:
+            raise ValueError("No returns data available")
+            
+        risk_calculator = RiskMetrics(returns, risk_free_rate)
+        return risk_calculator.risk_report()    
  
+    def print_risk_report(self, risk_free_rate=0.0):
+            """Print formatted risk report"""
+            report = self.calculate_risk_metrics(risk_free_rate)
+            
+            print("\n=== Portfolio Risk Report ===")
+            print(f"Analysis Period: {self.data.index[0].date()} to {self.data.index[-1].date()}")
+            print("-" * 50)
+            
+            for metric, value in report.items():
+                if isinstance(value, float):
+                    print(f"{metric:<25}: {value:.4f}")
+                else:
+                    print(f"{metric:<25}: {value}") 

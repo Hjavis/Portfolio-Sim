@@ -35,7 +35,7 @@ pf.print_portfolio_log(10)
 #portefølje metrics
 return_series_daily = portfolio_returns(pf)
 
-#Brug metrics til at risiko vurderinger.
+#Brug metrics til at enkelte risiko vurderinger.
 return_series = portfolio_returns(pf)
 riskpf = RiskMetrics(return_series)
 
@@ -44,6 +44,9 @@ VaR_Parametric = riskpf.value_at_risk(alpha = 0.05, method='parametric')
 
 #Tjek efter forskel på var med normalfordeling og den historiske
 print(f'VaR according to historical_var {VaR_Historical:.2%}, VaR according to parametric approach {VaR_Parametric:.2%}')
+
+#få en risiko rapport 
+pf.print_risk_report()
 
 #realised og unrealised profit and loss
 realisedpnl, unrealisedpnl = portfolio_pnl(pf)

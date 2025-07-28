@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
-from typing import Tuple, Optional
+
 
 
 class RiskMetrics:
@@ -39,7 +39,7 @@ class RiskMetrics:
         delta = self.annualized_return() - self.risk_free_rate 
         return delta / self.annualized_volatility()
     
-    def value_at_risk(self, alpha: float = 0.05, method: str = 'historical') -> float:
+    def value_at_risk(self, alpha: float = 0.05, method: str = 'parametric') -> float:
         """
         Calculate Value at Risk (VaR)
         
@@ -59,46 +59,23 @@ class RiskMetrics:
         else:
             raise ValueError("Method must be 'historical' or 'parametric'")
         
-
+    def expected_shortfall(self, alpha: float = 0.05) -> float:
+        """
+        Calculate Expected Shortfall (CVaR)
+        Average of losses beyond VaR
+        """
+        var = self.value_at_risk(alpha)
+        return -self.returns[self.returns <= -var].mean()
         
-    def simple_historical_var(portfolio, confidence_level=0.95, lookback_days=100) -> float:
+    def risk_report(self) -> dict:
         """
-        Calculates portfolio Value at Risk (VaR) using historical simulation.
-        Assumes that quantity of assets are constant over the lookback_days period.
-        Args:
-            confidence_level (float): Confidence level for VaR (e.g. 0.95 for 95% VaR).
-            lookback_days (int): Number of past trading days to use.
-
-        Returns:
-            float: Estimated daily VaR.
+        Generate comprehensive risk report
         """
-        if not portfolio.assets:
-            print("No assets in portfolio.")
-            return 0.0
-
-        returns = []
-        for ticker, quantity in portfolio.assets.items():
-            if (ticker, 'Close') not in portfolio.data.columns:
-                continue
-            price_series = portfolio.data[(ticker, 'Close')].dropna()
-            daily_returns = price_series.pct_change().dropna()
-            weighted_returns = daily_returns[-lookback_days:] * quantity * price_series.iloc[-1]
-            returns.append(weighted_returns)
-
-        if not returns:
-            print("No valid return data.")
-            return 0.0
-
-        portfolio_returns_series = pd.concat(returns, axis=1).sum(axis=1)
-        var = -np.percentile(portfolio_returns_series, (1 - confidence_level) * 100)
-        print(f"{int(confidence_level*100)}% 1-day Historical VaR: ${var:.2f}")
-        return var
-
-    def calculate_var_parametric(returns, confidence_level=0.95)-> float:
-        """Calculate VaR using parametric (normal distribution) approach
-        example: 0.055 = 5.5% loss at the confidence level.
-        """
-        mean = returns.mean()
-        std_dev = returns.std()
-        return -(mean + std_dev * stats.norm.ppf(1-confidence_level))
-    
+        report = {
+            'Annualized Return': self.annualized_return(),
+            'Annualized Volatility': self.annualized_volatility(),
+            'Sharpe Ratio': self.sharpe_ratio(),
+            '95% VaR (Parametric)': self.value_at_risk(0.05, 'parametric'),
+            '95% Expected Shortfall': self.expected_shortfall(0.05)}
+        
+        return report
