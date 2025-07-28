@@ -25,6 +25,8 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 
 ## Example usage
  ```python
+#Eksempel på brug
+
 #Data
 tickers, sectors= fetch_sp500_tickers()
 download_and_save_data(tickers,sectors)
@@ -38,6 +40,7 @@ pf.buy_asset('AAPL', 10, at_date='2016-01-05')
 pf.buy_asset('GOOGL', 155, at_date='2016-05-05')
 pf.buy_asset('TSLA', 241, at_date='2018-04-15')
 pf.buy_asset('NVDA', 41, at_date='2017-12-20')
+pf.buy_asset('JPM', 115, at_date='2018-04-12')
 
 pf.sell_asset('GOOGL', 100, at_date='2025-07-13') 
 
@@ -45,22 +48,27 @@ pf.sell_asset('GOOGL', 100, at_date='2025-07-13')
 print(pf.get_portfolio_value())
 pf.print_portfolio_log(10)
 
-#Test lidt metrics af
-print(simple_historical_var(pf, lookback_days=45))
+#portefølje metrics
+return_series_daily = portfolio_returns(pf)
 
+#Brug metrics til at enkelte risiko vurderinger.
 return_series = portfolio_returns(pf)
-var_parametric = calculate_var_parametric(return_series, confidence_level=0.95)
-print(var_parametric)
+riskpf = RiskMetrics(return_series)
+
+VaR_Historical = riskpf.value_at_risk(alpha = 0.05, method='historical')
+VaR_Parametric = riskpf.value_at_risk(alpha = 0.05, method='parametric')
 
 #Tjek efter forskel på var med normalfordeling og den historiske
-hist = simple_historical_var(pf, lookback_days=45)/pf.get_portfolio_value()
-print(f'VaR according to historical_var {hist}, VaR according to parametric approach {var_parametric}')
+print(f'VaR according to historical_var {VaR_Historical:.2%}, VaR according to parametric approach {VaR_Parametric:.2%}')
+
+#få en risiko rapport 
+pf.print_risk_report()
 
 #realised og unrealised profit and loss
 realisedpnl, unrealisedpnl = portfolio_pnl(pf)
 print(f'Realised PnL : {realisedpnl}, Unrealised PnL: {unrealisedpnl}')
 
-return_float = portfolio_return_float(pf)
+return_float = portfolio_return_float(pf, start_date='2020-01-01', end_date='2025-01-01')
 print(return_float)
 
 
