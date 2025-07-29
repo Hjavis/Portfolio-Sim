@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt     
+import matplotlib.pyplot as plt 
+from pairs_trading import find_cointegrated_pairs, compute_spread, generate_pairs_trading_signals
 from portfolio import Portfolio
 
 
@@ -8,6 +9,31 @@ class BackTester:
     def __init__(self, portfolio: Portfolio):
         self.portfolio = portfolio
         self.initial_cash = portfolio.starting_cash
+        
+    def pairs_trading_strategy(self, tickers, start_date=None, end_date=None, z_entry=2.0, z_exit=0.5):
+        """backtests pairs trading strategy, where ticker pairs can get traded independently from each other"""
+        # Data validering og filtrering
+        for ticker in tickers:
+            if ticker not in self.portfolio.data.columns.get_level_values(0):
+                raise ValueError(f'Ticker {ticker} blev ikke fundet i portefølje-data')
+        data_filtered = self.portfolio.data.loc[start_date:end_date, pd.IndexSlice[tickers, 'Close']]
+       
+        pairs = find_cointegrated_pairs(data_filtered, tickers)
+        results = {}  # dict til tradesignal og afkast for hvert par
+        
+        for t1, t2, pvalue in pairs:
+            s1 = data_filtered[t1]
+            s2 = data_filtered[t2]
+          
+            # spread og beta
+            spread_series, beta = compute_spread(s1, s2)
+            zscore_series = (spread_series - spread_series.mean()) / spread_series.std() 
+            
+            tradesignal = generate_pairs_trading_signals(s1, s2, beta, zscore_series, z_entry, z_exit)
+            
+            # Gem resultatet for dette par
+            results[(t1, t2)] = tradesignal
+        return results  # Dictionary: (t1, t2) -> tradesignal DataFrame
         
     def moving_average_strat(self, ticker, window: int = 30, start_date=None, end_date = None):
         """Backtests a MA-strategy on a given ticker in your portfolio"""
@@ -27,7 +53,6 @@ class BackTester:
         tradesignal['signal'][window:] = np.where(tradesignal['price'][window:] > tradesignal['ma'][window:], 1, -1)
         tradesignal['positions_change'] = tradesignal['signal'].diff() #Kigger efter hvornår der sker en ændring
         
-       
 
         #simulere trades
         for idx, row in tradesignal.iterrows():
@@ -144,6 +169,56 @@ class BackTester:
         self.strategy_summary(ticker, self.portfolio.starting_cash)
         self.generate_performance_report(signals, ticker)
         return signals
+    
+    def pairs_trading_strategy_summary(self, results: dict, initial_cash: float = None) -> None:
+        """
+        Prints a clean profitability summary of the pairs trading strategy.
+        Compares against buy-and-hold for each pair.
+        """
+        if initial_cash is None:
+            initial_cash = self.portfolio.starting_cash
+        
+        print(f"\n{' Pairs Trading Strategy Summary ':=^50}")
+        print(f"Number of pairs found: {len(results)}")
+        print(f"Period: {self.portfolio.data.index[0].date()} to {self.portfolio.data.index[-1].date()}")
+        
+        if len(results) == 0:
+            print("No cointegrated pairs found in the given ticker list.")
+            return
+        
+        total_return = 0
+        for (t1, t2), tradesignal in results.items():
+            # Calculate strategy performance for this pair
+            pair_returns = tradesignal['returns']
+            cumulative_return = (1 + pair_returns).prod() - 1
+            
+            # Buy-and-hold comparison for this pair
+            s1 = self.portfolio.data[(t1, 'Close')].loc[tradesignal.index]
+            s2 = self.portfolio.data[(t2, 'Close')].loc[tradesignal.index]
+            bh_return_1 = (s1.iloc[-1] / s1.iloc[0]) - 1
+            bh_return_2 = (s2.iloc[-1] / s2.iloc[0]) - 1
+            bh_return_avg = (bh_return_1 + bh_return_2) / 2
+            
+            # Trading metrics
+            n_trades = len(tradesignal[tradesignal['signal'] != 0])
+            
+            print(f"\nPair: {t1}-{t2}")
+            print(f"- Strategy Return: {cumulative_return:.2%}")
+            print(f"- Buy-and-Hold Return: {bh_return_avg:.2%}")
+            print(f"- Outperformance: {cumulative_return - bh_return_avg:.2%} percentage points")
+            print(f"- Number of trades: {n_trades}")
+            
+            total_return += cumulative_return
+        
+        print(f"\n{' Overall Performance ':-^30}")
+        print(f"- Average pair return: {total_return/len(results):.2%}")
+        print("="*50)
+
+    def trading_pairs_strategy_full(self, tickers: list):
+        """One-click analysis wrapper function for pairs trading"""
+        results = self.pairs_trading_strategy(tickers)
+        self.pairs_trading_strategy_summary(results, self.portfolio.starting_cash)
+        return results
     
     def buy_max(self,ticker, price, date):
         max_shares = int(self.portfolio.current_cash / price)

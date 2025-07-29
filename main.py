@@ -5,8 +5,6 @@ from riskmetrics import RiskMetrics
 from backtest import BackTester
 from utils import plot_portfolio, plot_portfolio_historic, plot_sector_distribution, plot_portfolio_return_volatility, plot_returns
 from metrics import portfolio_returns, portfolio_return_float, portfolio_pnl
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 #Eksempel på brug
