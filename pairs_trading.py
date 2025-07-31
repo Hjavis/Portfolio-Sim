@@ -2,7 +2,7 @@ from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
 from statsmodels.tsa.stattools import coint
 import pandas as pd
-
+#Prototype
 
 def find_cointegrated_pairs(data, tickers, significance=0.05):
     """Find cointegrated pairs in a list of time series data.
@@ -97,19 +97,19 @@ def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, 
     ret1 = series1.pct_change().fillna(0)
     ret2 = series2.pct_change().fillna(0)
     
-    # Ensure all series have the same index
+    # Sikre at de har samme index.
     common_index = tradesignal.index.intersection(ret1.index).intersection(ret2.index)
     tradesignal = tradesignal.loc[common_index]
     ret1 = ret1.loc[common_index]
     ret2 = ret2.loc[common_index]
     
-    # Afkast - ensure proper data types
+    
     pos1_shifted = tradesignal['pos1'].shift().fillna(0).astype(float)
     pos2_shifted = tradesignal['pos2'].shift().fillna(0).astype(float)
     ret1 = ret1.astype(float)
     ret2 = ret2.astype(float)
     
-    # Calculate returns step by step
+    #Afkast beregning
     returns_calc = pos1_shifted * ret1 + pos2_shifted * ret2
     tradesignal['returns'] = returns_calc
     return tradesignal

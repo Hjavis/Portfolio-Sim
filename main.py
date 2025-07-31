@@ -33,7 +33,7 @@ pf.print_portfolio_log(10)
 #portefølje metrics
 return_series_daily = portfolio_returns(pf)
 
-#Brug metrics til at enkelte risiko vurderinger.
+#Brug metrics til enkelte risiko vurderinger.
 return_series = portfolio_returns(pf)
 riskpf = RiskMetrics(return_series)
 

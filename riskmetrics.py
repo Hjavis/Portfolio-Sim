@@ -39,7 +39,7 @@ class RiskMetrics:
         delta = self.annualized_return() - self.risk_free_rate 
         return delta / self.annualized_volatility()
     
-    def value_at_risk(self, alpha: float = 0.05, method: str = 'parametric') -> float:
+    def value_at_risk(self, alpha: float = 0.05, method: str = 'historical') -> float:
         """
         Calculate Value at Risk (VaR)
         
