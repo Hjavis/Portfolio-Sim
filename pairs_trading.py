@@ -3,6 +3,7 @@ from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
 from statsmodels.tsa.stattools import coint
 import pandas as pd
+import numpy as np
 #Prototype
 
 def find_cointegrated_pairs(data, tickers, significance=0.05):
@@ -34,15 +35,25 @@ def test_cointegration(series1, series2):
 
 
 def compute_spread(series1, series2):
+    if isinstance(series1, pd.DataFrame):
+        series1 = series1.squeeze()
+    if isinstance(series2, pd.DataFrame):
+        series2 = series2.squeeze()
     # Lineær regression af series1 på series2 for at få hedge ratio (beta)
     X = add_constant(series2) # så modellen ikke tvinges gennem origo
-    model = OLS(series1, X).fit() 
+    
+    mask = (~series1.isna()) & (~series2.isna()) & (~np.isinf(series1)) & (~np.isinf(series2))
+        
+    series1_clean = series1.loc[mask]
+    X_clean = X.loc[mask]
+    
+    model = OLS(series1_clean, X_clean).fit() 
     
     
     alpha = model.params.iloc[0] #skæringspunkt med y-aksen
     beta = model.params.iloc[1] #hældningskoefficienten, hvor meget series1 ændrer sig når series2 ændrer sig med 1
 
-    spread = series1 - (beta * series2 + alpha) #spredning/residualerne
+    spread = series1_clean - (beta * series2.loc[mask] + alpha) #spredning/residualerne
     return spread, beta
 
 def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, z_exit=0.5) -> pd.DataFrame:
