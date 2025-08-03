@@ -8,7 +8,7 @@ from utils import plot_portfolio, plot_returns
 import yfinance as yf
 import statsmodels.api as sm
 
-
+#123
 tickers, sectors= fetch_sp500_tickers()
 download_and_save_data(tickers,sectors)
 data = load_data()
