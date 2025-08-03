@@ -10,15 +10,15 @@ class BackTester:
         self.portfolio = portfolio
         self.initial_cash = portfolio.starting_cash
         
-    def pairs_trading_strategy(self, tickers, start_date=None, end_date=None, z_entry=2.0, z_exit=0.5):
+    def pairs_trading_strategy(self, tickers, start_date=None, end_date=None, significance = 0.05, z_entry=2.0, z_exit=0.5):
         """backtests pairs trading strategy, where ticker pairs can get traded independently from each other"""
         # Data validering og filtrering
         for ticker in tickers:
             if ticker not in self.portfolio.data.columns.get_level_values(0):
-                raise ValueError(f'Ticker {ticker} blev ikke fundet i portefølje-data')
+                raise ValueError(f'Ticker {ticker} was not found in portfolio data')
         data_filtered = self.portfolio.data.loc[start_date:end_date, pd.IndexSlice[tickers, 'Close']]
        
-        pairs = find_cointegrated_pairs(data_filtered, tickers)
+        pairs = find_cointegrated_pairs(data_filtered, tickers, significance = significance)
         results = {}  # dict til tradesignal og afkast for hvert par
         
         for t1, t2, pvalue in pairs:
@@ -214,7 +214,7 @@ class BackTester:
         print(f"- Average pair return: {total_return/len(results):.2%}")
         print("="*50)
 
-    def trading_pairs_strategy_full(self, tickers: list):
+    def pairs_trading_strategy_full(self, tickers: list):
         """One-click analysis wrapper function for pairs trading"""
         results = self.pairs_trading_strategy(tickers)
         self.pairs_trading_strategy_summary(results, self.portfolio.starting_cash)

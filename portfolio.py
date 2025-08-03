@@ -211,6 +211,31 @@ class Portfolio:
         self.log = []
         print(f"Portfolio {self.name} has been reset.")    
     
+    def generate_random_portfolio(self, num_assets=30, max_shares = 200, start_date=None, end_date=None, random_seed=123):
+        """Generates a random portfolio with a given number of assets."""
+        #Filtrer data og set seed
+        if start_date:
+            self.data = self.data.loc[self.data.index >= pd.to_datetime(start_date)]
+        if end_date:
+            self.data = self.data.loc[self.data.index <= pd.to_datetime(end_date)]
+        
+        np.random.seed(random_seed)
+        tickers = list(self.data.columns.levels[0])
+        
+        
+        if num_assets > len(tickers):
+            num_assets = len(tickers)
+            
+        chosen_tickers = np.random.choice(tickers, size=num_assets, replace = False)
+        for ticker in chosen_tickers:
+            quantity = np.random.randint(1, max_shares + 1)
+            buy_date = np.random.choice(self.data.index)
+            self.buy_asset(ticker, quantity, at_date=buy_date)
+            
+
+        
+    
+        
     def set_cash(self, amount:float, at_date=None):
         """Sets the current cash to a specific amount."""
         if amount < 0:

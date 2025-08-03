@@ -1,3 +1,4 @@
+from ftplib import all_errors
 from statsmodels.regression.linear_model import OLS
 from statsmodels.tools.tools import add_constant
 from statsmodels.tsa.stattools import coint
@@ -18,17 +19,17 @@ def find_cointegrated_pairs(data, tickers, significance=0.05):
             t1, t2 = tickers[i], tickers[j]
             s1 = data[(t1, 'Close')].dropna()
             s2 = data[(t2, 'Close')].dropna()
-            common_idx = s1.index.intersection(s2.index)
-            if len(common_idx) < 100:  # skip hvis ikke nok overlap
+            all_common_idx = s1.index.intersection(s2.index)
+            if len(all_common_idx) < 100:  # skip hvis ikke nok overlap
                 continue
-            pvalue = test_cointegration(s1.loc[common_idx], s2.loc[common_idx])
+            pvalue = test_cointegration(s1.loc[all_common_idx], s2.loc[all_common_idx])
             if pvalue < significance:
                 pairs.append((t1, t2, pvalue))
     return sorted(pairs, key=lambda x: x[2]) #sortere efter p-værdi (key = p-værdi) eksempel: ('AAPL', 'MSFT', 0.01) laveste p-værdi først
 
 
 def test_cointegration(series1, series2):
-    score, pvalue, _ = coint(series1, series2)
+    score, pvalue, crit_value = coint(series1, series2)
     return pvalue  # p < 0.05 betyder cointegration
 
 
@@ -46,8 +47,8 @@ def compute_spread(series1, series2):
 
 def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, z_exit=0.5) -> pd.DataFrame:
     """
-    Genererer tradesignaler og positioner for et par baseret på zscore.
-    Returnerer et DataFrame med signal, positioner og returns.
+    Generates trading signals and positions for a pair based on zscore.
+    Returns and DataFrame with signal, positions and returns.
     """
     
     tradesignal = pd.DataFrame(index=zscore.index)
@@ -55,6 +56,7 @@ def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, 
     tradesignal['signal'] = 0
     tradesignal['pos1'] = 0
     tradesignal['pos2'] = 0
+    tradesignal['pos2'] = tradesignal['pos2'].astype(float)    
     tradesignal['returns'] = 0.0
 
     in_long = False
@@ -106,11 +108,13 @@ def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, 
     
     pos1_shifted = tradesignal['pos1'].shift().fillna(0).astype(float)
     pos2_shifted = tradesignal['pos2'].shift().fillna(0).astype(float)
-    ret1 = ret1.astype(float)
-    ret2 = ret2.astype(float)
+    ret1 = series1.pct_change().fillna(0).astype(float).squeeze()
+    ret2 = series2.pct_change().fillna(0).astype(float).squeeze()
+
     
     #Afkast beregning
     returns_calc = pos1_shifted * ret1 + pos2_shifted * ret2
     tradesignal['returns'] = returns_calc
+
     return tradesignal
 
