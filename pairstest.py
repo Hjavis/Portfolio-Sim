@@ -8,22 +8,19 @@ from utils import plot_portfolio, plot_returns
 import yfinance as yf
 import statsmodels.api as sm
 
-#Data
-#tickers, sectors= fetch_sp500_tickers()
-#download_and_save_data(tickers,sectors)
-#data = load_data()
 
-#pairspf = Portfolio('PairsTrading', data, starting_cash = 5000000)
-#pairspf.generate_random_portfolio()
-#pairspf.print_portfolio_log()
-#plot_portfolio(pairspf)
+tickers, sectors= fetch_sp500_tickers()
+download_and_save_data(tickers,sectors)
+data = load_data()
 
-#PairsBT = BackTester(pairspf)
-#pairstickers = np.random.choice(tickers, size=150, replace=False)
-#results = PairsBT.pairs_trading_strategy_full(tickers=pairstickers)
+pairspf = Portfolio('PairsTrading', data, starting_cash = 5000000)
+pairspf.generate_random_portfolio()
+pairspf.print_portfolio_log()
+plot_portfolio(pairspf)
 
-#Fandt en interessant kombination i BEN-CPT
-
+PairsBT = BackTester(pairspf)
+pairstickers = np.random.choice(tickers, size=150, replace=False)
+results = PairsBT.pairs_trading_strategy_full(tickers=pairstickers)
 
 
 tickers = ["TSLA", "SBUX"]
