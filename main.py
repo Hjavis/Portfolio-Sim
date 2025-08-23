@@ -2,7 +2,7 @@ from download_data import load_data, download_and_save_data, fetch_sp500_tickers
 from portfolio import Portfolio
 from cashflow import CashFlow, CashFlowManager, DerivativeCashFlow, DividendCashFlow, InterestCashFlow
 from riskmetrics import RiskMetrics
-from backtest import BackTester
+from backtest import BackTester, find_cointegrated_pairs
 from utils import plot_portfolio, plot_portfolio_historic, plot_sector_distribution, plot_portfolio_return_volatility, plot_returns
 from metrics import portfolio_returns, portfolio_return_float, portfolio_pnl
 import pandas as pd
@@ -100,3 +100,31 @@ pf_cfm.print_cash_flow_manager()
 #filtrér cashflows udfra type
 derivcf = pf_cfm.get_flows_by_type(DerivativeCashFlow)
 dividendcf = pf_cfm.get_flows_by_type(DividendCashFlow)
+
+
+pairst = Portfolio('pairst', data,)
+backtestpairs = BackTester(pairst)
+tickers_to_test = [
+    # Mega-cap Tech / Kommunikation
+    "AAPL", "MSFT", "GOOGL", "GOOG", "AMZN", "META", "NVDA", "IBM", "ORCL", "INTC",
+
+    # Finans
+    "JPM", "BAC", "C", "MS", "BLK", "SCHW", "USB", "V", "PYPL", "GS",
+
+    # Sundhed / Pharma
+    "JNJ", "PFE", "MRK", "ABBV", "LLY", "AMGN", "GILD", "UNH", "TMO", "MDT",
+
+    # Forbrug / Detail
+    "PG", "KO", "PEP", "COST", "WMT", "TGT", "MCD", "SBUX", "TSLA", "NFLX",
+
+    # Industri / Energi / Transport
+    "XOM", "CVX", "CAT", "DE", "GE", "HON", "LMT", "UPS", "FDX", "UNP",
+
+    # Andre store sektorer / Utilities / Real Estate
+    "DIS", "NEE", "SO", "SPG", "LIN", "PM", "MO", "CSCO", "TXN", "QCOM"
+]
+
+pair_tuples = find_cointegrated_pairs(tickers_to_test)
+
+
+backtestpairs.pairs_trading_strategy_full(tickers=tickers_to_test)

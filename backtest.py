@@ -10,27 +10,40 @@ class BackTester:
         self.portfolio = portfolio
         self.initial_cash = portfolio.starting_cash
         
-    def pairs_trading_strategy(self, tickers, start_date=None, end_date=None, significance = 0.05, z_entry=2.0, z_exit=0.5):
+    def pairs_trading_strategy(self, pairs, start_date=None, end_date=None, significance = 0.05, z_entry=2.3, z_exit=0.5, zscore_window = 30):
         """backtests pairs trading strategy, where ticker pairs can get traded independently from each other"""
-        # Data validering og filtrering
-        for ticker in tickers:
-            if ticker not in self.portfolio.data.columns.get_level_values(0):
-                raise ValueError(f'Ticker {ticker} was not found in portfolio data')
-        data_filtered = self.portfolio.data.loc[start_date:end_date, pd.IndexSlice[tickers, 'Close']]
-       
-        pairs = find_cointegrated_pairs(data_filtered, tickers, significance = significance)
-        results = {}  # dict til tradesignal og afkast for hvert par
+         #Hvis start_date og end_date ikke bliver specificeret
+        if start_date is None:
+            start_date = self.portfolio.data.index[0]
+        if end_date is None:
+            end_date = self.portfolio.data.index[-1]
+            
+        for t1, t2 in pairs:
+        # Tjek at begge tickers findes i data
+            if t1 not in self.portfolio.data.columns.get_level_values(0) or t2 not in self.portfolio.data.columns.get_level_values(0):
+                print(f"Skipping pair {t1}-{t2}: Ticker not found in data")
+                continue
         
-        for t1, t2, pvalue in pairs:
-            s1 = data_filtered[t1]
-            s2 = data_filtered[t2]
-          
+            results = {}  # dict til tradesignal og afkast for hvert par
+            s1 = self.portfolio.data[(t1, 'Close')].dropna()
+            s2 = self.portfolio.data[(t2, 'Close')].dropna()
+            
+            #please samme index
+            common_idx = s1.index.intersection(s2.index)
+            s1_common = s1.loc[common_idx]
+            s2_common = s2.loc[common_idx]
+                
             # spread og beta
-            spread_series, beta = compute_spread(s1, s2)
-            zscore_series = (spread_series - spread_series.mean()) / spread_series.std() 
-            
-            tradesignal = generate_pairs_trading_signals(s1, s2, beta, zscore_series, z_entry, z_exit)
-            
+            spread_series, beta = compute_spread(s1_common, s2_common)
+                
+            rolling_window = zscore_window
+            mean_series = spread_series.rolling(window=rolling_window).mean()
+            std_series  = spread_series.rolling(window=rolling_window).std()
+            zscore_series = (spread_series - mean_series) / std_series 
+            zscore_series = zscore_series.replace([np.inf, -np.inf], 0).fillna(0) #please ingen inf -> fillna(0)
+                
+            tradesignal = generate_pairs_trading_signals(s1_common, s2_common, beta, zscore_series, z_entry, z_exit)
+                
             # Gem resultatet for dette par
             results[(t1, t2)] = tradesignal
         return results  # Dictionary: (t1, t2) -> tradesignal DataFrame
@@ -40,7 +53,7 @@ class BackTester:
         if ticker not in self.portfolio.data.columns.get_level_values(0):
             raise ValueError(f'Ticker {ticker} was not found in portfolio data')
         
-        data_series = self.portfolio.data[ticker]['Close'].loc[start_date:end_date]        
+        data_series = self.portfolio.data[(ticker, 'Close')].loc[start_date:end_date]        
         ma = data_series.rolling(window).mean()
         
         tradesignal = pd.DataFrame(index=data_series.index)
@@ -49,8 +62,11 @@ class BackTester:
         tradesignal['signal'] = 0 #0 = hold, 1=buy_asset, -1=sell_asset
         tradesignal['returns'] = tradesignal['price'].pct_change()
 
-        #hvornår skal der gennemføres handler
-        tradesignal['signal'][window:] = np.where(tradesignal['price'][window:] > tradesignal['ma'][window:], 1, -1)
+        #hvornår skal der gennemføres handler - np.where(betingelse, værdi_hvis_sand, værdi_hvis_falsk)
+        start_date = tradesignal.index[window]
+        tradesignal.loc[start_date:, 'signal'] = np.where(
+            tradesignal['price'].loc[start_date:] > tradesignal['ma'].loc[start_date:], 1, -1)
+        
         tradesignal['positions_change'] = tradesignal['signal'].diff() #Kigger efter hvornår der sker en ændring
         
 
@@ -67,7 +83,7 @@ class BackTester:
         if ticker not in self.portfolio.data.columns.get_level_values(0):
             raise ValueError(f'Ticker {ticker} was not found in portfolio data')
         
-        data_series = self.portfolio.data[ticker]['Close'].loc[start_date:end_date]
+        data_series = self.portfolio.data[(ticker, 'Close')].loc[start_date:end_date]
         
 
         tradesignal = pd.DataFrame(index=data_series.index)
@@ -80,6 +96,7 @@ class BackTester:
         #filtrer ved at typecast booleanmask som int
         tradesignal['signal'] = ismay_to_oct.astype(int)
         
+        #simulere trades
         for idx, row in tradesignal.iterrows():
             if row['signal'] == 0: #Køb
                 self.buy_max(ticker, row['price'], idx)
@@ -109,10 +126,7 @@ class BackTester:
         
         # Trading metrics
         n_trades = len(ticker_log)
-        winning_trades = len(ticker_log[
-        ((ticker_log['Type'] == 'Buy') & (ticker_log['Total'] < 0)) |  # Losses
-        ((ticker_log['Type'] == 'Sell') & (ticker_log['Total'] > 0))   # Gains
-            ])
+        winning_trades = len(ticker_log[(ticker_log['Type'] == 'Sell') & (ticker_log['Total'] > 0)])
         
         win_rate = winning_trades / n_trades * 100 if n_trades > 0 else 0
         
@@ -187,12 +201,15 @@ class BackTester:
             return
         
         total_return = 0
+        valid_pairs = 0
         for (t1, t2), tradesignal in results.items():
-            # Calculate strategy performance for this pair
-            pair_returns = tradesignal['returns']
-            cumulative_return = (1 + pair_returns).prod() - 1
+            #fejlhåndtering
+            if tradesignal.empty or np.isnan(tradesignal['returns'].iloc[-1]) or np.isinf(tradesignal['returns'].iloc[-1]):
+                cumulative_return = np.nan  
+            else:
+                cumulative_return = tradesignal['cumulative_returns'].iloc[-1]
             
-            # Buy-and-hold comparison for this pair
+            # Buy-and-hold benchmark for dette pair
             s1 = self.portfolio.data[(t1, 'Close')].loc[tradesignal.index]
             s2 = self.portfolio.data[(t2, 'Close')].loc[tradesignal.index]
             bh_return_1 = (s1.iloc[-1] / s1.iloc[0]) - 1
@@ -200,7 +217,7 @@ class BackTester:
             bh_return_avg = (bh_return_1 + bh_return_2) / 2
             
             # Trading metrics
-            n_trades = len(tradesignal[tradesignal['signal'] != 0])
+            n_trades = (tradesignal['signal'].diff() != 0).sum()
             
             print(f"\nPair: {t1}-{t2}")
             print(f"- Strategy Return: {cumulative_return:.2%}")
@@ -208,15 +225,30 @@ class BackTester:
             print(f"- Outperformance: {cumulative_return - bh_return_avg:.2%} percentage points")
             print(f"- Number of trades: {n_trades}")
             
-            total_return += cumulative_return
+            if not np.isnan(cumulative_return):
+                total_return += cumulative_return
+                valid_pairs += 1
         
-        print(f"\n{' Overall Performance ':-^30}")
-        print(f"- Average pair return: {total_return/len(results):.2%}")
-        print("="*50)
+        if valid_pairs > 0:
+            avg_return = total_return / valid_pairs
+            print(f"\n{' Overall Performance ':-^30}")
+            print(f"- Average pair return: {avg_return:.2%}")
+        else:
+            print("\nNo valid pair returns.")
+            print("="*50)
 
-    def pairs_trading_strategy_full(self, tickers: list):
+    def pairs_trading_strategy_full(self, tickers: list, significance=0.05, max_pairs = 5):
         """One-click analysis wrapper function for pairs trading"""
-        results = self.pairs_trading_strategy(tickers)
+        #find cointegratede par
+        if len(tickers) > 80:
+            raise ValueError("Dont. 80 tickers is reasonable maximum due to time complexity")
+        
+        data_filtered = self.portfolio.data.loc[:, pd.IndexSlice[tickers, 'Close']]
+        pairs = find_cointegrated_pairs(data_filtered, tickers, significance=significance)
+        
+        best_pairs = [(t1, t2) for t1, t2, pvalue in pairs[:max_pairs]]
+        
+        results = self.pairs_trading_strategy(best_pairs)
         self.pairs_trading_strategy_summary(results, self.portfolio.starting_cash)
         return results
     
