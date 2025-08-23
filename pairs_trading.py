@@ -29,10 +29,10 @@ def find_cointegrated_pairs(data, tickers, significance=0.05):
     return sorted(pairs, key=lambda x: x[2]) #sortere efter p-værdi (key = p-værdi) eksempel: ('AAPL', 'MSFT', 0.01) laveste p-værdi først
 
 
-def test_cointegration(series1, series2):
+def test_cointegration(series1, series2) -> float:
+    """ Tests cointegration and returns pvalue as a float"""
     score, pvalue, crit_value = coint(series1, series2)
-    return pvalue  # p < 0.05 betyder cointegration
-
+    return pvalue  
 
 def compute_spread(series1, series2):
     if isinstance(series1, pd.DataFrame):
@@ -60,6 +60,8 @@ def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, 
     """
     Generates trading signals and positions for a pair based on zscore.
     Returns and DataFrame with signal, positions and returns.
+    
+    zscore = Standardized spread values
     """
     
     tradesignal = pd.DataFrame(index=zscore.index)
@@ -92,7 +94,7 @@ def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, 
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos1')] = 0
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos2')] = 0
             else:
-                tradesignal.iloc[i, tradesignal.columns.get_loc('signal')] = 1
+                tradesignal.iloc[i, tradesignal.columns.get_loc('signal')] = 1 #sikre at den forbliver in_long tilstand
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos1')] = 1
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos2')] = -beta
         elif in_short:
@@ -102,7 +104,7 @@ def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, 
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos1')] = 0
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos2')] = 0
             else:
-                tradesignal.iloc[i, tradesignal.columns.get_loc('signal')] = -1
+                tradesignal.iloc[i, tradesignal.columns.get_loc('signal')] = -1 ##sikre at den forbliver in_short tilstand
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos1')] = -1
                 tradesignal.iloc[i, tradesignal.columns.get_loc('pos2')] = beta
 
