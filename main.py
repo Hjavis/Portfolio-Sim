@@ -69,6 +69,7 @@ print(pf.get_portfolio_value())
 pf.print_portfolio_log(25)
 
 #Test CashFlow systemet
+pf.set_cash(100000)
 pf.buy_asset('KO', at_date='2024-01-01', quantity=4)
 Divcf = DividendCashFlow(amount=100, ticker='KO', date='2024-03-03', tax_rate=0.27)
 Divcf.apply(pf)
@@ -124,7 +125,7 @@ tickers_to_test = [
     "DIS", "NEE", "SO", "SPG", "LIN", "PM", "MO", "CSCO", "TXN", "QCOM"
 ]
 
-pair_tuples = find_cointegrated_pairs(tickers_to_test)
+pair_tuples = find_cointegrated_pairs(data=data, tickers=tickers_to_test)
 
 
 backtestpairs.pairs_trading_strategy_full(tickers=tickers_to_test)

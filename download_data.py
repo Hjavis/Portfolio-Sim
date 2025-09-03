@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import yfinance as yf
+import requests
 
 local_save_path = 'data/yfinancedata.parquet'
 
@@ -8,7 +9,10 @@ local_save_path = 'data/yfinancedata.parquet'
 def fetch_sp500_tickers():
     "Returns tickers and sectors. List and dictornary mapping sectors to the tickers."
 
-    sp500 = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")[0]
+    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+    html = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}).text
+    sp500 = pd.read_html(html)[0]
+    
     sp500['Symbol'] = sp500['Symbol'].str.replace(".", "-")
     tickers = sp500['Symbol'].tolist()
     sectors = dict(zip(sp500['Symbol'], sp500['GICS Sector']))
