@@ -116,17 +116,3 @@ dividendcf = cfm.get_flows_by_type(DividendCashFlow)
 - **Monte Carlo Simulation**  
   - 🎲 Stochastic simulation for portfolio forecasting in progress
 
-
-
-
-noter til mig selv
-utils
-def plot_portfolio_return_volatility(returns, rolling_window=30):
-    #skal bruge et fix
-
-randomwalk(skal laves ordenligt, dårlig autocomplete er ikke engang integreret endnu)
-
-cashflow discount, 
-
-def first_portfolio_activity og set som default på mange utils og metrics
-
