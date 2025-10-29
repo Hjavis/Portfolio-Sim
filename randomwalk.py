@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#prototype 
+
 def simple_random(steps=1000):
         """Generates a simple random walk."""
         return np.random.choice([-1, 1], size=steps).cumsum()
