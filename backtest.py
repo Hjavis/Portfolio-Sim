@@ -207,7 +207,7 @@ class BackTester:
             if tradesignal.empty or np.isnan(tradesignal['returns'].iloc[-1]) or np.isinf(tradesignal['returns'].iloc[-1]):
                 cumulative_return = np.nan  
             else:
-                cumulative_return = tradesignal['comulative_returns'].iloc[-1]
+                cumulative_return = tradesignal['cumulative_returns'].iloc[-1]
             
             # Buy-and-hold benchmark for dette pair
             s1 = self.portfolio.data[(t1, 'Close')].loc[tradesignal.index]
