@@ -158,51 +158,57 @@ class Portfolio:
         
     def portfolio_returns(self, start_date=None, end_date=None):
         """
-        Calculate portfolio returns based on current holdings and price data.
+        Convert multi-index DataFrame to a Series of returns.
         
-        Args:
-            start_date: Optional start date for the return series
-            end_date: Optional end date for the return series
+        Parameters:
+            start_date (str or pd.Timestamp) (Optional): Start date for return calculation
+            end_date  (str or pd.Timestamp) (Optional): End date for return calculation
             
         Returns:
-            pd.Series: Daily returns of the portfolio
+            pd.Series: Returns of the portfolio.
         """
-        # Filtrér
+        #Skulle bruge log? hvis man har købt og solgt og ens assets er tom. Derfor kan man stadig godt have haft tidligere returns
         data = self.data.copy()
         if start_date:
-            data = data.loc[data.index >= pd.to_datetime(start_date)]
+            data = data.loc[data.index >= pd.to_datetime(start_date)]  
         if end_date:
             data = data.loc[data.index <= pd.to_datetime(end_date)]
         
-        close_prices = data.xs('Close', level=1, axis=1)
-        daily_returns = close_prices.pct_change().dropna()
         
+        close_prices = data.xs('Close', axis=1, level=1)
+        clean_close_prices = close_prices.dropna(axis=1, thresh=int(0.9 * len(close_prices))) #Drop tickers med manglende data, kunne skyldes sen IPO eller delisting
         
+        daily_returns = clean_close_prices.pct_change(fill_method=None).dropna() #dropna efterfølgende for at undga NaN i første række
         if daily_returns.empty:
-            return pd.Series(dtype=float)
+            print("No return data available for the specified date range.")
         
-        # Beregn nuværende weights baseret på self.assets
-        current_prices = {ticker: data[(ticker, 'Close')].iloc[-1] 
+        current_prices = {ticker: self.data[(ticker, 'Close')].iloc[-1] 
                         for ticker in self.assets}
         weights = {ticker: self.assets[ticker] * current_prices[ticker] 
                 for ticker in self.assets}
         total_value = sum(weights.values())
         
-        # 
         if total_value == 0:
-            return pd.Series(0, index=daily_returns.index)
+            return pd.Series(dtype=float)
         
         # Normalisér weights
         weights = {t: w/total_value for t, w in weights.items()}
+        
         # Match med deres respektive tickers
         valid_tickers = [t for t in weights.keys() if t in daily_returns.columns]
-        
+
+        #Validering
+        if not valid_tickers:
+            raise ValueError("No valid tickers found in portfolio assets for return calculation.")
+        missing_tickers = [t for t in weights.keys() if t not in daily_returns.columns]
+        if missing_tickers:
+            raise ValueError(f"The following tickers are missing in the data for return calculation: {missing_tickers} Be aware that tickers with insufficient data have been dropped, which may be the cause.")
+
+        # wieght_series
+        weights_series = pd.Series(weights)[valid_tickers]
+
         #tag daglige returns enten positive eller negative for hver ticker, og gang dem med deres respektive vægt i porteføljen. ved at tage prikproduktet
-        if valid_tickers:
-            weights_series = pd.Series(weights)[valid_tickers]
-            return daily_returns[valid_tickers].dot(weights_series)
-        else:
-            return pd.Series(0, index=daily_returns.index)
+        return daily_returns[valid_tickers].dot(weights_series)
     
 
     def reset_portfolio(self):

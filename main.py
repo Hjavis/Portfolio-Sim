@@ -17,7 +17,7 @@ data = load_data()
 print(data.tail())
 
 #Opret din portefølje
-pf = Portfolio(name="Hja", data=data, starting_cash=1000000)
+pf = Portfolio(name="Hja", data=data, starting_cash=10000)
 
 #Buy sell
 pf.buy_asset('AAPL', 10, at_date='2016-01-05')
@@ -62,7 +62,7 @@ pf.reset_portfolio()
 
 pfbacktest = BackTester(pf)
 pfbacktest.moving_average_strategy_full('AAPL', window=30)
-pfbacktest.sell_in_may_and_go_away_strategy_full('TSLA')
+#pfbacktest.sell_in_may_and_go_away_strategy_full('TSLA')
 
 print(pf.get_portfolio_value())
 pf.print_portfolio_log(25)
@@ -123,8 +123,11 @@ tickers_to_test = [
     # Andre store sektorer / Utilities / Real Estate
     "DIS", "NEE", "SO", "SPG", "LIN", "PM", "MO", "CSCO", "TXN", "QCOM"
 ]
-
+#Valider tickers
+for ticker in tickers_to_test:
+    if ticker not in data.columns:
+        raise ValueError(f"Ticker {ticker} not found in data columns.")
+    
 pair_tuples = find_cointegrated_pairs(data=data, tickers=tickers_to_test)
-
-
 backtestpairs.pairs_trading_strategy_full(tickers=tickers_to_test)
+

@@ -131,10 +131,10 @@ def portfolio_returns(portfolio, start_date=None, end_date=None):
        data = data.loc[data.index <= pd.to_datetime(end_date)]
   
        
-    close_prices = data.loc[:, data.columns.get_level_values(1) == 'Close']
+    close_prices = data.xs('Close', axis=1, level=1)
     clean_close_prices = close_prices.dropna(axis=1, thresh=int(0.9 * len(close_prices))) #Drop tickers med manglende data, kunne skyldes sen IPO eller delisting
+    
     daily_returns = clean_close_prices.pct_change(fill_method=None).dropna() #dropna efterfølgende for at undga NaN i første række
-
     if daily_returns.empty:
         print("No return data available for the specified date range.")
     
@@ -158,12 +158,11 @@ def portfolio_returns(portfolio, start_date=None, end_date=None):
         raise ValueError("No valid tickers found in portfolio assets for return calculation.")
     missing_tickers = [t for t in weights.keys() if t not in daily_returns.columns]
     if missing_tickers:
-        raise ValueError(f'The following tickers are missing in the data for return calculation: {missing_tickers} Be aware that tickers with insufficient data have been dropped, which may be the cause.')
-
+        raise ValueError(f"The following tickers are missing in the data for return calculation: {missing_tickers} Be aware that tickers with insufficient data have been dropped, which may be the cause.")
 
     # wieght_series
     weights_series = pd.Series(weights)[valid_tickers]
-    
+
     #tag daglige returns enten positive eller negative for hver ticker, og gang dem med deres respektive vægt i porteføljen. ved at tage prikproduktet
     return daily_returns[valid_tickers].dot(weights_series)
     
