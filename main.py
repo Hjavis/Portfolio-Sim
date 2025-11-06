@@ -17,7 +17,7 @@ data = load_data()
 print(data.tail())
 
 #Opret din portefølje
-pf = Portfolio(name="Hja", data=data, starting_cash=100000)
+pf = Portfolio(name="Hja", data=data, starting_cash=1000000)
 
 #Buy sell
 pf.buy_asset('AAPL', 10, at_date='2016-01-05')

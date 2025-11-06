@@ -28,7 +28,7 @@ def download_and_save_data(tickers, sectors, save_path=local_save_path):
     data = yf.download(
         tickers, 
         start="2015-01-01", 
-        end=pd.to_datetime('today').normalize().strftime("%Y-%m-%d"), 
+        end=pd.to_datetime('today').strftime("%Y-%m-%d"), 
         group_by='ticker',
         progress=False
     )

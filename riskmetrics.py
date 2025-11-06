@@ -17,11 +17,16 @@ class RiskMetrics:
             returns: Pandas Series of portfolio returns
             risk_free_rate: Annualized risk-free rate (default Danish Goverment Bond)
         """
-            
-
+        if not isinstance(returns, pd.Series):
+            raise ValueError("Returns must be a pd.Series")
+        
         self.returns = returns.dropna()
         self.risk_free_rate = risk_free_rate
         self._annual_factor = np.sqrt(251)
+
+        if self.returns.empty:
+            raise ValueError("Return series is empty after dropping NaN values.")
+
 
     def annualized_return(self) -> float:
         """Calculate annualized return from daily returns"""
