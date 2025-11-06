@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import yfinance as yf
 import requests
+from io import StringIO
 
 local_save_path = 'data/yfinancedata.parquet'
 
@@ -9,13 +10,15 @@ local_save_path = 'data/yfinancedata.parquet'
 def fetch_sp500_tickers():
     "Returns tickers and sectors. List and dictornary mapping sectors to the tickers."
 
-    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    html = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}).text
-    sp500 = pd.read_html(html)[0]
-    
-    sp500['Symbol'] = sp500['Symbol'].str.replace(".", "-")
+    url = "https://www.slickcharts.com/sp500"
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}).text
+    sp500 = pd.read_html(StringIO(response))[0]
+   
+    sp500['Symbol'] = sp500['Symbol'].str.replace(".", "-", regex=False).str.strip()
     tickers = sp500['Symbol'].tolist()
-    sectors = dict(zip(sp500['Symbol'], sp500['GICS Sector']))
+    sectors = dict(zip(sp500['Symbol'], ['Unknown'] * len(tickers))) #Placeholder
+
+    #sectors = {ticker: yf.Ticker(ticker).info.get('sector', 'Unknown') for ticker in tickers} INDIVIDUEL API CALLS MIDLERTIDIG LØSNING INDTIL WIKIPEDIA MAGTER
     return tickers, sectors
 
 def download_and_save_data(tickers, sectors, save_path=local_save_path):
@@ -50,6 +53,7 @@ def load_data(file_path=local_save_path):
     
 if __name__ == "__main__":
     tickers, sectors = fetch_sp500_tickers()
+    download_and_save_data(tickers, sectors)
     data = load_data()
     print("Data downloaded successfully")
-    print(data.head())
+    print(data.tail())

@@ -40,7 +40,7 @@ riskpf = RiskMetrics(return_series)
 VaR_Historical = riskpf.value_at_risk(alpha = 0.05, method='historical')
 VaR_Parametric = riskpf.value_at_risk(alpha = 0.05, method='parametric')
 
-#Tjek efter forskel på var med normalfordeling og den historiske
+#Tjek efter forskel på var med normalfordeling og den historiske, lange haler betyder at en normalfordeling kan være misvisende.
 print(f'VaR according to historical_var {VaR_Historical:.2%}, VaR according to parametric approach {VaR_Parametric:.2%}')
 
 #få en risiko rapport 

@@ -129,7 +129,7 @@ def portfolio_returns(portfolio, start_date=None, end_date=None):
        data = data.loc[data.index <= pd.to_datetime(end_date)]
 
     close_prices = data.xs('Close', level=1, axis=1)
-    daily_returns = close_prices.pct_change().dropna()
+    daily_returns = close_prices.pct_change(fill_method=None).dropna()
 
     current_prices = {ticker: portfolio.data[(ticker, 'Close')].iloc[-1] 
                      for ticker in portfolio.assets}
