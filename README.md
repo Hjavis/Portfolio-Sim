@@ -3,13 +3,13 @@ A Python-based platform for backtesting trading strategies, analyzing portfolio 
 
 ## ✨ Key Features
 
-- 📈 **Multi-Asset Portfolio Management** - Track stocks, cash positions, and transactions  
-- 🤖 **Strategy Backtesting** - Test moving average, seasonal, pairs trading, and custom strategies  
-- 📉 **Risk Analysis Tools** - Value-at-Risk (VaR), Sharpe ratio, and other risk metrics  
-- 📊 **Performance Visualization** - Interactive charts for returns, allocations, and sector distribution  
-- 💰 **Cash Flow Handling** - Comprehensive management of dividends, interest, and derivative flows  
-- ⚡ **YFinance Integration** - Automatic S&P 500 data downloading with sector information  
-- 🏆 **Summary & Benchmarks** - Compare strategies against buy-and-hold performance  
+-  **Multi-Asset Portfolio Management** - Track stocks, cash positions, and transactions  
+-  **Strategy Backtesting** - Test moving average, seasonal, pairs trading, and custom strategies  
+-  **Risk Analysis Tools** - Value-at-Risk (VaR), Sharpe ratio, and other risk metrics  
+-  **Performance Visualization** - Charts for returns, allocations, and sector distribution  
+-  **Cash Flow Handling** - Comprehensive management of dividends, interest, and derivative flows  
+-  **YFinance Integration** - Automatic S&P 500 data downloading with sector information  
+-  **Summary & Benchmarks** - Compare strategies against buy-and-hold performance  
 
 ## 🛠 Core Functionality
 
@@ -106,13 +106,13 @@ dividendcf = cfm.get_flows_by_type(DividendCashFlow)
 ## ⚠️ Current Limitations & Upcoming Fixes
 
 - **Data Validation**         
-  - 🧩 Enhanced data validation for missing or invalid data  
+  -  Enhanced data validation for missing or invalid data  
 - **Transaction Costs**          
-  - 💸 Basic transaction cost modeling (fees/slippage to be added)  
+  -  Basic transaction cost modeling (fees/slippage to be added)  
 - **Inflation Adjustment**   
-  - 💹 No inflation/currency adjustment yet  
+  -  No inflation/currency adjustment yet  
 - **Risk-Adjusted Metrics**           
-  - 📐 Additional metrics like Sortino ratio planned  
+  -  Additional metrics like Sortino ratio planned  
 - **Monte Carlo Simulation**  
-  - 🎲 Stochastic simulation for portfolio forecasting in progress
+  -  Stochastic simulation for portfolio forecasting in progress
 
