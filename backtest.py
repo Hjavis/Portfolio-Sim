@@ -207,7 +207,7 @@ class BackTester:
             if tradesignal.empty or np.isnan(tradesignal['returns'].iloc[-1]) or np.isinf(tradesignal['returns'].iloc[-1]):
                 cumulative_return = np.nan  
             else:
-                cumulative_return = tradesignal['cumulative_returns'].iloc[-1]
+                cumulative_return = tradesignal['comulative_returns'].iloc[-1]
             
             # Buy-and-hold benchmark for dette pair
             s1 = self.portfolio.data[(t1, 'Close')].loc[tradesignal.index]
@@ -249,7 +249,7 @@ class BackTester:
         best_pairs = [(t1, t2) for t1, t2, pvalue in pairs[:max_pairs]]
         
         results = self.pairs_trading_strategy(best_pairs)
-        self.pairs_trading_strategy_summary(results, self.portfolio.starting_cash)
+        self.pairs_trading_strategy_summary(results)
         return results
     
     def buy_max(self,ticker, price, date):

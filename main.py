@@ -115,14 +115,15 @@ tickers_to_test = [
     "JNJ", "PFE", "MRK", "ABBV", "LLY", "AMGN", "GILD", "UNH", "TMO", "MDT",
 
     # Forbrug / Detail
-    "PG", "KO", "PEP", "COST", "WMT", "TGT", "MCD", "SBUX", "TSLA", "NFLX",
+    #"PG", "KO", "PEP", "COST", "WMT", "TGT", "MCD", "SBUX", "TSLA", "NFLX",
 
     # Industri / Energi / Transport
-    "XOM", "CVX", "CAT", "DE", "GE", "HON", "LMT", "UPS", "FDX", "UNP",
+    #"XOM", "CVX", "CAT", "DE", "GE", "HON", "LMT", "UPS", "FDX", "UNP",
 
     # Andre store sektorer / Utilities / Real Estate
-    "DIS", "NEE", "SO", "SPG", "LIN", "PM", "MO", "CSCO", "TXN", "QCOM"
+    #"DIS", "NEE", "SO", "SPG", "LIN", "PM", "MO", "CSCO", "TXN", "QCOM"
 ]
+
 #Valider tickers
 for ticker in tickers_to_test:
     if ticker not in data.columns:

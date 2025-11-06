@@ -161,7 +161,7 @@ def generate_pairs_trading_signals(series1, series2, beta, zscore, z_entry=2.0, 
     
     daily_returns = (pos1_shifted * ret1 + pos2_shifted * ret2)
     tradesignal['returns'] = daily_returns.astype(float)
-    tradesignal['comulative_returns'] = (1 + daily_returns).cumprod() - 1
+    tradesignal['cumulative_returns'] = (1 + daily_returns).cumprod() - 1
     
     return tradesignal
 
