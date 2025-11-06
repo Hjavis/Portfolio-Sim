@@ -14,6 +14,8 @@ tickers, sectors= fetch_sp500_tickers()
 download_and_save_data(tickers,sectors)
 data = load_data()
 
+print(data.tail())
+
 #Opret din portefølje
 pf = Portfolio(name="Hja", data=data, starting_cash=100000)
 
@@ -30,12 +32,9 @@ pf.sell_asset('GOOGL', 100, at_date='2025-07-13')
 print(pf.get_portfolio_value())
 pf.print_portfolio_log(10)
 
-#portefølje metrics
-return_series_daily = portfolio_returns(pf)
-
 #Brug metrics til enkelte risiko vurderinger.
-return_series = portfolio_returns(pf)
-riskpf = RiskMetrics(return_series)
+return_series_daily = portfolio_returns(pf)
+riskpf = RiskMetrics(return_series_daily)
 
 VaR_Historical = riskpf.value_at_risk(alpha = 0.05, method='historical')
 VaR_Parametric = riskpf.value_at_risk(alpha = 0.05, method='parametric')
@@ -56,7 +55,7 @@ print(return_float)
 
 #Visualiser portefølje, returns og mere med utils
 plot_portfolio(pf)
-plot_returns(return_series)
+plot_returns(return_series_daily)
 
 #Backtest indbygget strategier
 pf.reset_portfolio()

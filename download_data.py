@@ -10,15 +10,13 @@ local_save_path = 'data/yfinancedata.parquet'
 def fetch_sp500_tickers():
     "Returns tickers and sectors. List and dictornary mapping sectors to the tickers."
 
-    url = "https://www.slickcharts.com/sp500"
-    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}).text
-    sp500 = pd.read_html(StringIO(response))[0]
+    url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+    html = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}).text
+    sp500 = pd.read_html(StringIO(html))[0]
    
-    sp500['Symbol'] = sp500['Symbol'].str.replace(".", "-", regex=False).str.strip()
+    sp500['Symbol'] = sp500['Symbol'].str.replace(".", "-", regex=False)
     tickers = sp500['Symbol'].tolist()
-    sectors = dict(zip(sp500['Symbol'], ['Unknown'] * len(tickers))) #Placeholder
-
-    #sectors = {ticker: yf.Ticker(ticker).info.get('sector', 'Unknown') for ticker in tickers} INDIVIDUEL API CALLS MIDLERTIDIG LØSNING INDTIL WIKIPEDIA MAGTER
+    sectors = dict(zip(sp500['Symbol'], sp500['GICS Sector']))
     return tickers, sectors
 
 def download_and_save_data(tickers, sectors, save_path=local_save_path):
@@ -30,7 +28,7 @@ def download_and_save_data(tickers, sectors, save_path=local_save_path):
     data = yf.download(
         tickers, 
         start="2015-01-01", 
-        end=pd.to_datetime('today').strftime("%Y-%m-%d"), 
+        end=pd.to_datetime('today').normalize().strftime("%Y-%m-%d"), 
         group_by='ticker',
         progress=False
     )

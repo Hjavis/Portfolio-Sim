@@ -120,6 +120,7 @@ class Portfolio:
         
     def verify_date(self, date) -> pd.Timestamp:
         """Checks if the given date is in the data index, if not, returns the next available date."""
+        date = pd.to_datetime(date).normalize()
         if date not in self.data.index:
             print(f"Date {date} not found in data.")
             next_dates = self.data.index[self.data.index > date]
